@@ -1,0 +1,13 @@
+# 敏感内容：永不入库（客户原始PDF、待处理原料）
+90-Archive-PDF/
+00-Inbox/
+.obsidian/workspace*.json
+
+# Python / 工具产物
+.venv/
+.uvcache/
+__pycache__/
+*.pyc
+
+# 系统
+.DS_Store

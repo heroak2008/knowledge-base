@@ -1,0 +1,14 @@
+[project]
+name = "local-rag"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.162.0",
+    "ollama>=0.6.3",
+    "qdrant-client>=1.20.0",
+    "uvicorn>=0.54.0",
+]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
