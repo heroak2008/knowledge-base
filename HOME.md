@@ -24,4 +24,4 @@ cd 40-Prototype/local-rag && uv run python server.py   # 本地 RAG 问答
 - 活跃：[[60-Projects/_template-project|示例]]
 
 ## 最近洞察
--
+- [[10-Papers/2026-11-11-modern-web-guidance机制解析|modern-web-guidance 机制解析]] → 沉淀概念卡：[[70-Knowledge/增量知识库|增量知识库]]、[[70-Knowledge/薄入口厚语料|薄入口厚语料]]、[[70-Knowledge/实验闭环与uplift指标|实验闭环与uplift]]
