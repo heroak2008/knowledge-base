@@ -1,9 +1,10 @@
 ---
 type: insight
 date: 2026-11-11
+updated: 2026-11-11 (补充 §3.10 CLI 中介机制)
 source: https://github.com/GoogleChrome/modern-web-guidance (v1.0.0)
 status: done
-tags: [skill协议, 知识库架构, agent评测]
+tags: [skill协议, 知识库架构, agent评测, cli]
 ---
 
 # Modern Web Guidance 机制解析:Skill × 外挂知识库 × 实验驱动优化
@@ -233,6 +234,40 @@ sequenceDiagram
     Note over A,C: 匿名遥测(查询词/指南ID)回流生产侧
 ```
 
+### 3.10 CLI 中介:npm 包 `modern-web-guidance` 的构成与选型动机
+
+图中「CLI(npm 分发)」是一个真实的 npm 命令行工具——**整个技能的检索引擎**。Agent 从不直接读 `guides/` 目录,所有知识访问都经它中介。npm registry 实测元信息:
+
+```json
+{
+  "name": "modern-web-guidance",
+  "version": "1.0.0",
+  "bin": { "modern-web-guidance": "skills/modern-web-guidance/modern-web.mjs" },
+  "dist.unpackedSize": 16503129,
+  "dependencies": "(字段不存在 → 零依赖)"
+}
+```
+
+**构成**(由实测数据 + README 推证):
+
+- 入口二进制 `modern-web.mjs`,源码在 `modern-web-guidance-src`(`src/cli/modern-web.ts`,README.md:610);本发布仓库的 `package.json:31-33` 只声明 `bin` 路径,**不含该文件**;
+- **16.5 MB 解包体积** = CLI 代码 + **内嵌的指南语料副本** + **本地离线搜索索引与 embedding 模型**(README.md:470)——所以 `search` 完全离线、零 API key,网络仅在 `npx` 拉包时需要;
+- 零运行时依赖(README.md:475),兼顾低延迟与供应链安全;
+- 子命令全集:`search` / `retrieve` / `legacy-scan` / `install` / `update` / `set-allow-origin-trials` / `set-allow-volatile-features`。
+
+**为什么是 CLI,而不是让 Agent 直接读指南文件**:
+
+| 动机 | 说明 |
+|---|---|
+| 语义检索需要引擎 | 209 篇指南靠 embedding+BM25 匹配,远超 `grep`/文件遍历;索引必须预构建、随包分发 |
+| 内容保鲜 | `@latest` 每次拉最新包,安装时的技能文件不随时间腐烂;`--skill-version` 把检索锁到与已装 SKILL.md 一致的语料版本 |
+| 平台无关 | 任何能跑 shell 的 Agent 都能用,不依赖各平台的 skill/MCP 机制——「一份内容接十余家平台」的底层原因 |
+| 上下文管理 | `retrieve` 统一处理 >9.5KB 落盘防截断(SKILL.md:39),裸文件读取无此标准化 |
+| 策略执行点 | `.mwgrc` 门控(易变特性封锁)在 `retrieve` 层强制执行——集中式闸门 |
+| 遥测钩子 | 搜索词、指南 ID 的匿名回收集成在 CLI 内(README.md:610),即生产侧反馈通道 |
+
+**双通道分发关系**:发布仓库里的 `guides/*.md` 是给人浏览、给插件市场安装的**静态副本**;Agent 实际消费的是 npm 包内嵌的**另一份副本+索引**。两条通道并行,`--skill-version`(如 `2026_11_09-5bcc021b`)保证协议(SKILL.md)与语料(npm 包)不错位。
+
 ---
 
 ## 4. 机制二:实验驱动的持续评估与优化
@@ -461,10 +496,10 @@ modern-web-guidance/
 
 ---
 
-*文档生成于对仓库 `GoogleChrome/modern-web-guidance` @ v1.0.0(commit 4dd9683)的静态分析;[实验数据归档(Eval Dashboard)](https://googlechrome.github.io/modern-web-guidance-src/)已于 2026-11-11 验证可访问,§7 局限 1/2 中"基建不可见/细分指标无数据佐证"已被该 Dashboard 部分修正。*
-
+*文档生成于对仓库 `GoogleChrome/modern-web-guidance` @ v1.0.0(commit 4dd9683)的静态分析;外部链接(Eval Dashboard、源仓库)内容未验证。*
 
 ## 沉淀到本库的概念卡
 - [[../70-Knowledge/增量知识库|增量知识库]]
 - [[../70-Knowledge/薄入口厚语料|薄入口厚语料]]
 - [[../70-Knowledge/实验闭环与uplift指标|实验闭环与uplift指标]]
+- [[../70-Knowledge/CLI中介层|CLI中介层]]
