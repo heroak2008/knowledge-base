@@ -27,6 +27,21 @@ tags: [skill协议, 知识库架构, agent评测]
 
 ---
 
+## 0. 参考链接
+
+| 资源 | 链接 | 说明 |
+|---|---|---|
+| 发布仓库(本篇分析对象) | https://github.com/GoogleChrome/modern-web-guidance | 纯内容:SKILL.md + 209 篇指南 |
+| 源仓库(开发+评测基建) | https://github.com/GoogleChrome/modern-web-guidance-src | 靶场应用、黄金解、Playwright 评分器 |
+| **实验数据归档(Eval Dashboard)** | https://googlechrome.github.io/modern-web-guidance-src/ | Nightly/基线 A/B 评测全量数据:按 agent 与按指南细分通过率、可访问性检查、逐任务 diff 与日志 |
+| 检索质量看板 | https://googlechrome.github.io/modern-web-guidance-src/search/ | search 命中质量追踪 |
+| 演示应用浏览 | https://googlechrome.github.io/modern-web-guidance-src/demos/ | 靶场应用在线浏览 |
+| 官方文档 | https://developer.chrome.com/docs/modern-web-guidance | Chrome 开发者文档 |
+
+> Dashboard 关键事实(2026-11 验证):评测为 **nightly 自动化**(每晚跑全量任务集)+ 1.0 基线双轨;评分器断言的是**渲染后浏览器行为**而非指南特定写法(发现误杀合理实现时会放宽断言并重跑全量,见 "How we test & measure");指标含通过率、自动可访问性检查、任务时长、未缓存 token 消耗四维。
+
+---
+
 ## 1. 项目概览
 
 **一句话定位**:把现代 Web 平台最佳实践做成「可检索的外挂知识库」,通过 Skill 协议驱动 AI 编程代理在写码前消费它,并用持续实验证明/校准这些知识真的提升了代理的产出质量。
@@ -446,7 +461,7 @@ modern-web-guidance/
 
 ---
 
-*文档生成于对仓库 `GoogleChrome/modern-web-guidance` @ v1.0.0(commit 4dd9683)的静态分析;外部链接(Eval Dashboard、源仓库)内容未验证。*
+*文档生成于对仓库 `GoogleChrome/modern-web-guidance` @ v1.0.0(commit 4dd9683)的静态分析;[实验数据归档(Eval Dashboard)](https://googlechrome.github.io/modern-web-guidance-src/)已于 2026-11-11 验证可访问,§7 局限 1/2 中"基建不可见/细分指标无数据佐证"已被该 Dashboard 部分修正。*
 
 
 ## 沉淀到本库的概念卡
