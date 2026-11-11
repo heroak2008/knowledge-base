@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-11",
+  "system_version": "v1.17",
+  "files": [
+    "/Users/acoin/Documents/Acoin/Acoin/知识库/50-Docs/02 ai-native工作台/CoreALM-Next系统设计方案.md",
+    "/Users/acoin/Documents/Acoin/Acoin/知识库/50-Docs/02 ai-native工作台/CoreALM-Next知识工程建设任务清单.md",
+    "/Users/acoin/Documents/Acoin/Acoin/知识库/50-Docs/02 ai-native工作台/CoreALM-Next builtin接入建设任务清单.md",
+    "/Users/acoin/Documents/Acoin/Acoin/知识库/50-Docs/02 ai-native工作台/CoreALM-Next功能模块划分.md",
+    "/Users/acoin/Documents/Acoin/Acoin/知识库/50-Docs/03 知识工程/AI原生研发作业知识工程实施方案.md",
+    "/Users/acoin/Documents/Acoin/Acoin/知识库/50-Docs/03 知识工程/研发作业知识管理参考方案.md"
+  ],
+  "asset_files": 10,
+  "responsibility_groups_preserved": true,
+  "priorities_preserved": true,
+  "local_links_valid": true,
+  "knowledge_modules": 18,
+  "construction_tasks": 14,
+  "acceptance_cases": 12,
+  "backup": "/Users/acoin/Documents/Acoin/Acoin/知识库/99-Assets/CoreALM-Next/知识工程/历史/2026-11-11-v117"
+}
