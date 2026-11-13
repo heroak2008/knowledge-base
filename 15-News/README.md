@@ -1,10 +1,11 @@
 # 15-News · AI 资讯索引（MOC）
 
 > 本文件由每日任务自动维护，作为资讯分区的检索入口。
-> 最后更新：2026-11-12
+> 最后更新：2026-11-13
 
 ## 📅 日报（每日 09:00 更新）
 
+- [2026-11-13 · AI资讯日报](2026-11-13-AI资讯日报.md) —— 经济学人预警AI崩盘；中国模型被查出管制GPU指纹+参议院立案；Edge0-145B端侧开源；World Labs Atlas开放
 - [2026-11-12 · AI资讯日报](2026-11-12-AI资讯日报.md) —— AWS 开源"100% Agent 编写"项目爆火；联合航空禁 AI 订票；Gemini Decisions API 发布；退休金输血 AI 泡沫曝光
 - [2026-11-11 · AI资讯日报](2026-11-11-AI资讯日报.md) —— Gemini 4 Carbon 发布对垒 Fable 5.2；Apple 将推本地模型应用；Anthropic IPO 定档 1.4T；Chrome 官方为 Agent 出知识库
 - [2026-11-10 · AI资讯日报](2026-11-10-AI资讯日报.md) —— Claude Fable 5.2 得分 65 创历史新高；Google 发布 TPU 8 系列；Fireworks AI 二次被黑；Agent 专用 3D 引擎 vork 上榜
