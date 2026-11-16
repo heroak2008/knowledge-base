@@ -5,6 +5,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.162.0",
     "ollama>=0.6.3",
+    "pillow>=13.0.0",
     "qdrant-client>=1.20.0",
     "uvicorn>=0.54.0",
 ]
