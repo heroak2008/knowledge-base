@@ -1856,12 +1856,17 @@ function workbenchView(){
 
 // ===== 任务作业台入口：多任务现场选择页 + 空状态 =====
 function taskSelectorView(){
- const list=view.taskEmptyDemo?[]:workItems.slice(0,8);
- return heading('TASK WORKBENCH','任务作业台','你所有任务现场的入口：选择一个任务进入它的现场。作业台不是某个任务的专属页，现场随任务轮换。',button(view.taskEmptyDemo?'恢复演示数据':'模拟：我没有任何待办','task-empty-demo','small'))+
- (view.taskEmptyDemo||!list.length
- ?`<div class="panel"><div class="panel-body" style="text-align:center;padding:44px 20px">${icon('check')}<h3 style="margin:10px 0 6px">没有需要你亲自到场的任务</h3><p class="tiny muted" style="max-width:460px;margin:0 auto;line-height:1.9">空状态也是信息，三种可能：真的空闲；活已全部委托给 Agent（去「运营与进化」看上线观察）；都在等外部输入（去「我的工作 · 等待依赖」）。作业台只在"任务轮到你"时才有现场。</p><div class="flex" style="justify-content:center;gap:8px;margin-top:16px">${button('从需求/事件装配新任务','task-new','primary')}${button('查看 Agent 执行观察窗','navigate','','data-value="operations"')}</div></div></div>`
- :`<div class="grid-main">${list.map(t=>`<div class="panel"><div class="panel-body"><div class="between"><strong class="tiny mono">${t.id}</strong>${badge(t.status,['可执行'].includes(t.status)?'green':['执行中'].includes(t.status)?'teal':'amber')}</div><p style="margin:8px 0 4px;font-size:13px">${t.name}</p><p class="tiny muted">${t.kind} · ${t.space} · ${t.date}</p><div class="flex" style="gap:8px;margin-top:10px">${t.id==='WK-204'?button('进入现场 '+icon('arrow'),'task-open','primary','data-value="WK-204"'):button('现场未建模（演示数据）','task-open','','disabled')}</div></div></div>`).join('')}</div>`);
+ const recent=view.taskEmptyDemo?[]:workItems.filter(t=>t.id!=='WK-204').slice(0,3);
+ return heading('TASK WORKBENCH','任务作业台','这里不是任务清单——清单在「我的工作」。作业台只放你打开的现场：正在进行的会话，随时恢复上下文。',button(view.taskEmptyDemo?'恢复演示数据':'模拟：没有任何现场','task-empty-demo','small'))+
+ (view.taskEmptyDemo
+ ?`<div class="panel"><div class="panel-body" style="text-align:center;padding:44px 20px">${icon('check')}<h3 style="margin:10px 0 6px">当前没有打开的现场</h3><p class="tiny muted" style="max-width:460px;margin:0 auto;line-height:1.9">没有进行中的会话。活都在别处：待办在「我的工作」，Agent 执行在「运营与进化」的观察窗，等外部的在「我的工作 · 等待依赖」。任务轮到你时，现场会在这里打开。</p><div class="flex" style="justify-content:center;gap:8px;margin-top:16px">${button('去「我的工作」选择任务','navigate','primary','data-value="work"')}${button('查看 Agent 执行观察窗','navigate','','data-value="operations"')}</div></div></div>`
+ :`<div class="section-label"><h2>打开的现场（1）</h2><span class="tiny muted">会话保持中 · 恢复即回到上次离开时的上下文</span></div>
+ <div class="panel mb" style="border-left:3px solid #0f766e"><div class="panel-body"><div class="between"><div><strong>动态路由热更新 · 特性脚本调测</strong> <span class="mono tiny muted">WK-204 · CIDA-271</span><div class="flex" style="gap:6px;margin-top:6px">${badge('活跃 · 刚刚','teal',true)}${badge('现场已恢复就绪','green')}</div></div><div class="flex" style="gap:8px">${button('恢复现场 '+icon('arrow'),'task-open','primary','data-value="WK-204"')}</div></div><p class="tiny muted" style="margin-top:10px">上次离开：验证前置确认（交付 FD-028 待确认）。未决 2 项，外部副作用：无。</p></div></div>
+ <div class="section-label"><h2>最近关闭的现场</h2><span class="tiny muted">重开会重新装配上下文（对应 resume.md 恢复读取顺序）</span></div>
+ <div class="grid-main">${recent.map(t=>`<div class="panel"><div class="panel-body"><div class="between"><strong class="tiny mono">${t.id}</strong>${badge(t.status,'amber')}</div><p style="margin:8px 0 4px;font-size:13px">${t.name}</p><p class="tiny muted">${t.kind} · ${t.space}</p><div class="flex" style="margin-top:10px">${button('现场未建模（演示）','task-open','','disabled')}</div></div></div>`).join('')}</div>
+ <div class="callout">${icon('info')}<div>要找新的任务？去 <button data-action="navigate" data-value="work" class="aw-inline-link">我的工作</button> ——那是你的责任队列（先做哪件事）；这里是你的会话区（回到正在做的事）。两页职责不同：队列管理候选，会话管理进行中。</div></div>`);
 }
+
 Object.assign(actions,{
  'task-open':v=>{view.taskId=v;render();},
  'task-back':()=>{view.taskId=null;render();},
