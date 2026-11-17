@@ -652,6 +652,7 @@
 <body><a class="skip" href="#main">跳到主内容</a><div id="app"></div><div id="modal-root"></div><div id="toast" role="status" aria-live="polite"></div><script>/* v1.17 前置占位：主脚本末尾 render() 先于补丁执行，避免页表引用未定义函数 */
 function usagePage(){return '';}
 function govAssetsPending(){return 0;}
+function decisionInboxView(){return '';}
 function govAssetsView(){return '';}
 </script>
 <script>// MainSpace registry (v0.5 §3.1/§5): product-level spaces with version scopes.
@@ -1067,7 +1068,7 @@ function work(){const tasks0=workItems.map(t=>({...t,status:workItemStatus(t)}))
  const groups=workGroupDefs.map(([key,title,statuses,desc])=>[key,title,desc,(key==='urgent'?urgents:normal).filter(t=>statuses.includes(t.status))]);const show=groups.filter(([k])=>view.workFilter==='all'||view.workFilter===k);
  const waitingCollapsed=view.workWaitingOpen!==true;
  const archiveBlock=isArchivableBlockedReason();
- return heading('MY WORK','我的工作','所有参与空间的事务聚合到这里；打开任务后自动匹配作业系统、资产和执行环境。',button(icon('filter')+'参与关系','participation')+button('全局责任视图','work-global-scope','primary'))+`<div class="callout mb">${icon('users')}<span>你在不同任务中参与开发、脚本调测和评审。挂起等答置顶不可折叠；等待依赖组默认折叠。个人责任不因空间筛选消失。</span></div>`+tabs([['all','全部',tasks0.length],...groups.map(([key,title,,list])=>[key,title,list.length])],view.workFilter,'work-filter')+`<div class="filterbar">${search('work-search',view.workQuery,'搜索我的事务')}<select id="work-facet" class="select" aria-label="空间筛选"><option value="all">全部空间</option>${Object.entries(teamDefs).map(([id,d])=>`<option value="${id}" ${facetMs===id?'selected':''}>${d.name}</option>`).join('')}</select><span class="tiny muted">筛选只作用于普通分组；挂起等答不受影响</span></div>${focus.length||urgents.length?`<div class="today-focus"><div class="between" style="margin-bottom:10px"><strong style="font-size:12px">${icon('spark')} 今日焦点</strong><span class="tiny muted">≤5条 · 挂起等答不占额度</span></div>${urgents.map(u=>`<div class="focus-row urgent"><span class="badge red dot">等答</span><div class="grow"><strong style="font-size:12px">${esc(u.name)}</strong><p class="tiny muted">${esc(u.urgentReason)} · ${esc(u.deadline)}</p></div>${button('去处理','work-detail','small','data-value="'+u.id+'"')}</div>`).join('')}${focus.map(t=>`<div class="focus-row"><span class="badge ${t.status==='可执行'?'green':t.status==='输入变更'?'red':'amber'} dot">${t.status}</span><div class="grow"><strong style="font-size:12px">${esc(t.name)}</strong><p class="tiny muted">${t.id} · ${esc(workNextAction[t.id]?.()?.what||'')}</p></div>${button('打开','work-detail','small','data-value="'+t.id+'"')}</div>`).join('')}</div>`:''}${merged.length?`<div class="merged-bar">${merged.map(m=>`<button class="merged-item" data-action="navigate" data-value="${m.page}">${icon('layers')}<b>${esc(m.type)} ×${m.count}</b><span class="tiny muted">${esc(m.detail)}</span></button>`).join('')}</div>`:''}${archiveBlock?`<div class="archive-note tiny muted">${icon('info')} 归档暂缓：${archiveBlock}（已闭环事务保留在已完成组）</div>`:''}<div class="grid-main"><div>${show.map(([key,title,desc,list])=>{
+ return heading('MY WORK','我的工作','所有参与空间的事务聚合到这里；打开任务后自动匹配作业系统、资产和执行环境。',button(icon('filter')+'参与关系','participation')+button('全局责任视图','work-global-scope','primary'))+decisionInboxView()+`<div class="callout mb">${icon('users')}<span>你在不同任务中参与开发、脚本调测和评审。挂起等答置顶不可折叠；等待依赖组默认折叠。个人责任不因空间筛选消失。</span></div>`+tabs([['all','全部',tasks0.length],...groups.map(([key,title,,list])=>[key,title,list.length])],view.workFilter,'work-filter')+`<div class="filterbar">${search('work-search',view.workQuery,'搜索我的事务')}<select id="work-facet" class="select" aria-label="空间筛选"><option value="all">全部空间</option>${Object.entries(teamDefs).map(([id,d])=>`<option value="${id}" ${facetMs===id?'selected':''}>${d.name}</option>`).join('')}</select><span class="tiny muted">筛选只作用于普通分组；挂起等答不受影响</span></div>${focus.length||urgents.length?`<div class="today-focus"><div class="between" style="margin-bottom:10px"><strong style="font-size:12px">${icon('spark')} 今日焦点</strong><span class="tiny muted">≤5条 · 挂起等答不占额度</span></div>${urgents.map(u=>`<div class="focus-row urgent"><span class="badge red dot">等答</span><div class="grow"><strong style="font-size:12px">${esc(u.name)}</strong><p class="tiny muted">${esc(u.urgentReason)} · ${esc(u.deadline)}</p></div>${button('去处理','work-detail','small','data-value="'+u.id+'"')}</div>`).join('')}${focus.map(t=>`<div class="focus-row"><span class="badge ${t.status==='可执行'?'green':t.status==='输入变更'?'red':'amber'} dot">${t.status}</span><div class="grow"><strong style="font-size:12px">${esc(t.name)}</strong><p class="tiny muted">${t.id} · ${esc(workNextAction[t.id]?.()?.what||'')}</p></div>${button('打开','work-detail','small','data-value="'+t.id+'"')}</div>`).join('')}</div>`:''}${merged.length?`<div class="merged-bar">${merged.map(m=>`<button class="merged-item" data-action="navigate" data-value="${m.page}">${icon('layers')}<b>${esc(m.type)} ×${m.count}</b><span class="tiny muted">${esc(m.detail)}</span></button>`).join('')}</div>`:''}${archiveBlock?`<div class="archive-note tiny muted">${icon('info')} 归档暂缓：${archiveBlock}（已闭环事务保留在已完成组）</div>`:''}<div class="grid-main"><div>${show.map(([key,title,desc,list])=>{
   const isUrgent=key==='urgent',isWaiting=key==='waiting';
   if(isWaiting&&waitingCollapsed&&list.length){const top=list.slice(0,2);return `<div class="work-group"><div class="group-heading"><span class="live-dot group-dot-waiting"></span>等待依赖<small>${list.length}</small><span class="group-desc">默认折叠 · 点击展开</span>${button('展开','work-waiting-toggle','small')}</div><div class="panel">${top.map(t=>t.rowHtml||'').join('')}<button class="work-waiting-more" data-action="work-waiting-toggle">还有 ${list.length-top.length} 项等待中 · 展开</button></div></div>`;}
   return `<div class="work-group ${isUrgent?'urgent-group':''}"><div class="group-heading"><span class="live-dot group-dot-${key}"></span>${title}<small>${list.length}</small><span class="group-desc">${desc}</span>${isWaiting&&list.length?button('收起','work-waiting-toggle','small'):''}</div><div class="panel">${list.map(t=>{
@@ -1774,6 +1775,44 @@ function govAssetsView(){
 }
 Object.assign(actions,{
  'gov-asset-decide':el=>{const x=govAssetQueue.find(q=>q.id===el.dataset.value);modal(`${x.id} ${x.type}裁决`,`<p>${x.obj}</p><dl class="detail-pairs"><dt>裁决门</dt><dd>${x.gate}</dd><dt>说明</dt><dd>${x.detail}</dd><dt>裁决人</dt><dd>${x.owner}</dd></dl><p class="tiny muted">裁决留痕可追溯；裁决人与对象提交人必须不同（禁止自审批）。</p>`,button('关闭','close-modal'));}
+});
+
+/* ===== 我的工作·决策收件箱（v1.17 增补 rev4）：Agent 申请 + 证据 + AI 推荐 + 反方证据 =====
+   对应《我的工作演进-决策收件箱与自动化分级》：L2 形态——Agent 推进到人工中断点，人做批准/否决/补充信息/亲自看。 */
+const decisionPkgs=[
+ {id:'DP-112',kind:'转测交付',task:'WK-205 动态路由联调',ask:'Agent 已完成自检与冒烟（回执×3），申请转测交付',
+  rec:'批准',conf:82,why:'同类交付 12 次中 11 次一次通过；断言规则集 v4 上线后误报率 3.1%',
+  contra:'依赖仓 rc4 与目标版本存在 1 处未消除差异（接口默认值），已在交付说明标注',
+  src:'执行Agent · 10分钟前'},
+ {id:'DP-111',kind:'知识固化',task:'经验卡片「网关重试上限经验」',ask:'Agent 从 5 条执行记录提炼出候选经验卡片，申请固化入库',
+  rec:'补充信息',conf:64,why:'证据链完整（5 条记录引用），但 2 条记录来自旧网关版本，适用范围需确认',
+  contra:'旧版本样本占比 40%，直接入库可能高估当前网关的适用性',
+  src:'知识Agent · 1小时前'},
+ {id:'DP-110',kind:'改进回退',task:'IC-024 知识装配配额调整',ask:'上线观察指标回退（上下文溢出告警回升），Agent 申请回退到上一资产版本',
+  rec:'批准回退',conf:91,why:'观察第 9 天告警回到调整前水平，假设未成立',
+  contra:'回退影响 3 个空间的装配策略，其中 1 个空间近期无执行（影响待确认）',
+  src:'运营Agent · 2小时前'}];
+function decisionInboxView(){
+ return `<section class="panel mb" style="border-left:3px solid var(--amber,#d97706)">
+ <div class="panel-head"><h2>决策收件箱 <span class="tiny muted">· ${decisionPkgs.length} 个 Agent 进程等你表态（L2：Agent 执行 · 人决策）</span></h2>
+ <span class="tiny muted">先处理表态，再看队列 · 推荐人≠决策人 · 否决/复核留痕</span></div>
+ ${decisionPkgs.map(d=>`<div class="risk-item"><div class="between"><div>
+ <h3>${badge(d.kind,d.kind==='转测交付'?'green':d.kind==='知识固化'?'teal':'amber')} ${d.id} · ${d.task}</h3>
+ <p>${d.ask}</p>
+ <p class="tiny">AI 推荐：<strong>${d.rec}</strong>（置信度 ${d.conf}%）—— ${d.why}</p>
+ <p class="tiny" style="color:var(--amber,#b45309)">⚠ 反方证据：${d.contra}</p>
+ <p class="tiny muted">${d.src}</p></div>
+ <div class="flex">${button('打开决策包','decide-open','primary small',`data-value="${d.id}"`)}</div></div></div>`).join('')}
+ <div class="callout">${icon('info')}决策包 = 事项 + 证据 + 可解释推荐 + 反方证据；批准/否决（理由必填）/补充信息/跳作业台现场四类操作均留痕。自动化程度分级演进（L2→L3 白名单自动+上线观察），每级可回退。</div></section>`;
+}
+Object.assign(actions,{
+ 'decide-open':el=>{const d=decisionPkgs.find(x=>x.id===el.dataset.value);modal(`${d.id} ${d.kind} · 决策包`,`<p>${d.ask}</p>
+ <dl class="detail-pairs"><dt>AI 推荐</dt><dd>${d.rec}（置信度 ${d.conf}%）</dd><dt>推荐依据</dt><dd>${d.why}</dd><dt>反方证据</dt><dd style="color:var(--amber,#b45309)">${d.contra}</dd><dt>来源</dt><dd>${d.src}</dd></dl>
+ <p class="tiny muted">操作留痕：批准 / 否决（理由必填，回写任务现场）/ 补充信息（Agent 续作时消费）/ 我要亲自看（跳作业台现场）。AI 永远不是裁决人。</p>`,
+ button('批准','decide-approve')+button('否决·理由必填','decide-reject')+button('补充信息','decide-info')+button('关闭','close-modal'));},
+ 'decide-approve':()=>{closeModal();render();toast('已批准：裁决留痕已写入任务现场，Agent 将继续推进');},
+ 'decide-reject':()=>{closeModal();render();toast('已登记否决：需填写理由，Agent 收到后转入整改分支');},
+ 'decide-info':()=>{closeModal();render();toast('已打开补充信息表单：Agent 续作时将消费你补充的上下文');}
 });
 render();
 </script>
