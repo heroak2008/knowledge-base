@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CoreALM-Next 介绍说明</title>
+<style>
+:root{--ink:#243e46;--muted:#5f767b;--line:#dfe8e4;--bg:#f7faf8;--card:#ffffff;--teal:#187361;--teal-soft:#edf6f2;--amber:#ac7727;--amber-soft:#fbf5e9;--blue:#5277a2;--blue-soft:#eef3f9}
+*{box-sizing:border-box}
+body{margin:0;font-family:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);line-height:1.8;font-size:15px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 28px 80px}
+header.hero{background:linear-gradient(135deg,#0f3d34,#187361 60%,#2c8a74);color:#fff;padding:56px 0 46px}
+header.hero .wrap{padding-bottom:0}
+.eyebrow{font-size:12px;letter-spacing:.25em;opacity:.85;margin-bottom:14px}
+h1{font-size:32px;margin:0 0 12px;line-height:1.35;font-weight:680}
+.hero p.lead{font-size:15.5px;opacity:.92;margin:0;max-width:840px}
+.meta{margin-top:20px;font-size:12.5px;opacity:.75;display:flex;gap:18px;flex-wrap:wrap}
+nav.toc{position:sticky;top:0;z-index:20;background:rgba(247,250,248,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);margin:0 -28px;padding:0 28px}
+nav.toc a{display:inline-block;padding:13px 15px 11px;font-size:13.5px;color:var(--muted);text-decoration:none;border-bottom:2.5px solid transparent}
+nav.toc a:hover{color:var(--teal);border-bottom-color:var(--teal)}
+section{margin-top:54px}
+h2{font-size:22px;font-weight:660;margin:0 0 6px;display:flex;align-items:baseline;gap:12px}
+h2 .num{font-size:13px;color:var(--teal);letter-spacing:.12em;font-weight:650}
+h2+ p.sub{color:var(--muted);margin-top:0;font-size:14px}
+h3{font-size:16px;font-weight:640;margin:26px 0 8px}
+p{margin:10px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin:18px 0;box-shadow:0 1px 3px rgba(30,60,55,.05)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g5{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.kpi b{display:block;font-size:14.5px;margin-bottom:5px;color:var(--teal)}
+.kpi span{font-size:12.5px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0}
+th{background:var(--teal-soft);color:#134f43;text-align:left;padding:9px 12px;font-weight:640}
+td{border-bottom:1px solid var(--line);padding:9px 12px;vertical-align:top}
+figure{margin:22px 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 14px 8px;overflow-x:auto}
+figcaption{text-align:center;font-size:12.5px;color:var(--muted);padding:8px 0 10px}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;margin:20px 0}
+.flow .step{flex:1 1 140px;min-width:130px;background:var(--card);border:1.5px solid #9bbab1;border-radius:12px;padding:14px 12px;text-align:center;position:relative;margin:0 14px 14px 0}
+.flow .step:last-child{margin-right:0}
+.flow .step .no{display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%;background:var(--teal);color:#fff;font-size:13px;font-weight:700;margin-bottom:8px}
+.flow .step b{display:block;font-size:14.5px;margin-bottom:5px}
+.flow .step small{color:var(--muted);font-size:12px;line-height:1.55;display:block}
+.flow .step:not(:last-child)::after{content:"→";position:absolute;right:-13px;top:50%;transform:translateY(-50%);color:var(--teal);font-size:16px;font-weight:700;z-index:2}
+.note{background:var(--amber-soft);border-left:4px solid var(--amber);border-radius:0 10px 10px 0;padding:12px 18px;font-size:13.5px;margin:16px 0}
+footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+svg text{font-family:inherit}
+@media print{nav.toc{display:none}header.hero{padding:36px 0}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">COREALM-NEXT · 介绍说明</div>
+    <h1>CoreALM-Next 是什么</h1>
+    <p class="lead">产业装备部建设的研发作业平台。它把现有的作业系统、Agent Teams、公司模型服务和池化资源接到一起，研发人员在同一个工作台里做任务协同、复用资产、跑 AI 执行、看用量，并把用出来的经验沉淀成下一轮能用的东西。</p>
+    <div class="meta"><span>静态介绍页 · 可独立分发</span><span>依据系统设计 v1.18 与知识工程实施方案</span></div>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap" style="padding:0">
+  <a href="#s0">概述</a><a href="#s1">工作空间</a><a href="#s2">资产版本管理</a><a href="#s3">规范化·可度量·可扩展·可进化</a><a href="#s4">作业流程</a><a href="#s5">设计原则</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ===================== 0 概述 ===================== -->
+<section id="s0">
+  <h2><span class="num">01</span>概述</h2>
+  <p>现状是：需求在 CoreALM、测试设计在专业系统、脚本和构建又各归各家，AI 辅助作业大多零散使用，过程没有留痕，好坏说不清。CoreALM-Next 要解决的就是把这个过程管起来。平台提供五块能力：</p>
+  <div class="grid g5">
+    <div class="kpi"><b>任务协同</b><span>跨系统任务关联、待办与进展汇总；业务事实仍在来源系统</span></div>
+    <div class="kpi"><b>资产复用</b><span>Skill、Workflow、SOP 等有版本、有证据、可派生</span></div>
+    <div class="kpi"><b>执行记录</b><span>AI 与人工的全过程留痕，可双向追溯</span></div>
+    <div class="kpi"><b>用量分析</b><span>Token / Credit 三侧去重统计、多维分析</span></div>
+    <div class="kpi"><b>持续改进</b><span>候选、验证、发布、观察、回退，一套流程走完</span></div>
+  </div>
+  <div class="note">平台不替代任何来源系统。需求、任务、代码的状态仍归原系统持有，平台维护的是关联、配置、执行和分析记录，对外操作都以来源回执为准。</div>
+</section>
+
+<!-- ===================== 1 工作空间 ===================== -->
+<section id="s1">
+  <h2><span class="num">02</span>工作空间怎么建</h2>
+  <p class="sub">按业务范围（产品 / 服务 / 版本）组织，配单父级的空间树和订阅机制，不按用户团队拆。</p>
+
+  <figure>
+    <svg viewBox="0 0 980 330" width="100%" role="img" aria-label="工作空间树形结构示意">
+      <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#527b75"/></marker></defs>
+      <style>.bx{fill:#fff;stroke:#9bbab1;stroke-width:1.4;rx:10}.tt{font-size:15px;font-weight:650;fill:#243e46}.ss{font-size:11.5px;fill:#5f767b}.ln{stroke:#527b75;stroke-width:1.6;fill:none;marker-end:url(#ar)}</style>
+      <rect x="30" y="30" width="270" height="86" rx="10" class="bx" style="fill:#edf6f2;stroke:#187361"/>
+      <text x="52" y="62" class="tt" fill="#134f43">产品主空间（R2.8）</text>
+      <text x="52" y="88" class="ss">关联：产品X · 服务A/B · 版本R2.8</text>
+      <rect x="380" y="20" width="250" height="80" rx="10" class="bx"/>
+      <text x="400" y="50" class="tt">服务研发空间</text>
+      <text x="400" y="74" class="ss">继承主空间 · 订阅代码仓知识</text>
+      <rect x="380" y="130" width="250" height="80" rx="10" class="bx"/>
+      <text x="400" y="160" class="tt">产品验证空间</text>
+      <text x="400" y="184" class="ss">覆盖：测试设计来源 · 忽略构建</text>
+      <rect x="380" y="240" width="250" height="80" rx="10" class="bx"/>
+      <text x="400" y="270" class="tt">版本集成空间</text>
+      <text x="400" y="294" class="ss">订阅构建与部署活动</text>
+      <path d="M300 73 H355 V60 H374" class="ln"/><path d="M300 73 H355 V170 H374" class="ln"/><path d="M300 73 H355 V280 H374" class="ln"/>
+      <rect x="690" y="60" width="262" height="96" rx="10" fill="#fbf5e9" stroke="#ac7727" stroke-width="1.3"/>
+      <text x="710" y="92" class="tt" fill="#7a5417">父配置更新不自动下发</text>
+      <text x="710" y="116" class="ss">提示差异，子空间管理者逐项确认</text>
+      <text x="710" y="138" class="ss">可继承 / 覆盖 / 忽略，保留本地定制</text>
+      <path d="M630 170 H658 V108 H684" class="ln" stroke-dasharray="5 4"/>
+      <rect x="690" y="200" width="262" height="96" rx="10" fill="#eef3f9" stroke="#5277a2" stroke-width="1.3"/>
+      <text x="710" y="230" class="tt" fill="#33506e">来源对象（只引用，不重建）</text>
+      <text x="710" y="254" class="ss">产品/服务/版本 · SR/Issue/Task</text>
+      <text x="710" y="276" class="ss">从同步目录选，权限另行校验</text>
+      <path d="M165 116 V248 H684" class="ln" stroke-dasharray="5 4"/>
+    </svg>
+    <figcaption>图 1 · 工作空间：单父级树 + 来源引用 + 差异确认</figcaption>
+  </figure>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:0">基本规则</h3>
+      <ul>
+        <li>一个空间可以关联多个产品、服务、版本对象；同一个对象也可以被多个空间用，跨产品、跨服务的作业不用另建体系。</li>
+        <li>关联对象从同步目录里选，不手填地址。成员可以提议，空间管理者确认后生效，范围外的对象置灰。</li>
+        <li>要用别的空间的资产，走订阅。订阅不等于权限——读取和装载始终按发起用户的实际授权校验。</li>
+        <li>状态只有"使用中"和"已归档"两种。归档保留关联和历史，恢复要审批；有没跑完的执行时不允许归档。空间可以迁移，先预览差异，身份和历史都保留。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">几个容易问的问题</h3>
+      <ul>
+        <li><b>上游改了配置，我会不会被动跟着变？</b>不会。父空间更新只提示差异，子空间确认后才采用，可以逐项处理，本地覆盖保留。</li>
+        <li><b>为什么不在平台里重建一份产品数据？</b>同一事实只能有一个写入方。来源系统的数据平台只引用，避免两边对不上。</li>
+        <li><b>空间是干嘛用的？</b>它是范围和配置的生效边界——任务关联、知识装配、AI 执行都只在这个范围里工作。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2 资产版本管理 ===================== -->
+<section id="s2">
+  <h2><span class="num">03</span>小队 / Skill 等资产怎么管版本、怎么同步</h2>
+  <p class="sub">Agent 配置、Skill、Workflow、场景 SOP、上下文模板、装配策略、构建验证配置，统一登记，统一走版本生命周期。</p>
+
+  <figure>
+    <svg viewBox="0 0 980 250" width="100%" role="img" aria-label="资产生命周期">
+      <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#527b75"/></marker></defs>
+      <style>.a1{fill:#fff;stroke:#9bbab1;stroke-width:1.4}.a2{fill:#edf6f2;stroke:#187361;stroke-width:1.6}.t1{font-size:15px;font-weight:650}.s1{font-size:11.5px;fill:#5f767b}</style>
+      <g><rect x="20" y="40" width="160" height="78" rx="10" class="a1"/><text x="40" y="70" class="t1">草稿</text><text x="40" y="94" class="s1">授权范围内可试用</text></g>
+      <g><rect x="218" y="40" width="170" height="78" rx="10" class="a1"/><text x="238" y="70" class="t1">试用 / 评测</text><text x="238" y="94" class="s1">提交对应版本证据</text></g>
+      <g><rect x="426" y="40" width="170" height="78" rx="10" class="a1"/><text x="446" y="70" class="t1">独立审核</text><text x="446" y="94" class="s1">审核人 ≠ 提交人</text></g>
+      <g><rect x="634" y="40" width="170" height="78" rx="10" class="a2"/><text x="654" y="70" class="t1" fill="#134f43">发布</text><text x="654" y="94" class="s1">版本冻结，不可修改</text></g>
+      <line x1="180" y1="79" x2="212" y2="79" stroke="#527b75" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <line x1="388" y1="79" x2="420" y2="79" stroke="#527b75" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <line x1="596" y1="79" x2="628" y2="79" stroke="#527b75" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <g><rect x="20" y="160" width="200" height="70" rx="10" fill="#eef3f9" stroke="#5277a2" stroke-width="1.3"/><text x="40" y="188" class="t1" fill="#33506e">派生定制</text><text x="40" y="210" class="s1">保留上游差异，合入重新审核</text></g>
+      <g><rect x="270" y="160" width="200" height="70" rx="10" fill="#faeeec" stroke="#b6594d" stroke-width="1.3"/><text x="290" y="188" class="t1" fill="#7c3b32">归档</text><text x="290" y="210" class="s1">不再被新采用，在途执行用原版本</text></g>
+      <g><rect x="520" y="160" width="280" height="70" rx="10" fill="#fbf5e9" stroke="#ac7727" stroke-width="1.3"/><text x="540" y="188" class="t1" fill="#7a5417">资产包</text><text x="540" y="210" class="s1">组成版本一起锁定，整体评测和发布</text></g>
+      <path d="M719 118 V150 H140 V156" stroke="#527b75" stroke-width="1.4" fill="none" stroke-dasharray="5 4"/>
+      <text x="740" y="140" font-size="11.5" fill="#5f767b">上游更新只提示差异，不合入就不影响定制版</text>
+    </svg>
+    <figcaption>图 2 · 资产生命周期：草稿 → 试用/评测 → 独立审核 → 不可变发布</figcaption>
+  </figure>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:0">版本怎么管</h3>
+      <ul>
+        <li>发布的版本不可修改，有问题走新版本。想正式发布，必须带上这个版本的试用或评测证据，审核人和提交人不能是同一个人。</li>
+        <li>定制可以派生：派生版保留和上游的差异。上游更新了只提示差异，要不要合入由维护者定，合入后是新草稿、重新审核，不会自动覆盖定制。</li>
+        <li>不是所有知识都要走这套流程。SPEC、文档这类普通知识，来源系统的原生修订和评审回执就是依据；只有要发布给他人复用的 Skill、SOP、策略，才进完整的发布生命周期。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">更新怎么同步</h3>
+      <ul>
+        <li>来源改了、删了、撤权了，平台会观察到变化，把受影响的索引和摘要标记为待更新或不可用，未授权的读取直接被挡掉，同时给相关人生成复核待办。</li>
+        <li>正在跑的执行不受影响，继续用开始时的条件；确实要换条件，就显式派生一个新基线，不静默切换。</li>
+        <li>每次执行都会冻结一份清单（ContextManifest）：用了哪些知识修订、哪个装配策略版本、实际装载了什么、中间有什么变化。"准备装载"和"实际装载"分开记，事后能还原当时现场，不用靠猜。</li>
+        <li>空间要采用资产的新版本，同样是先看差异、确认后生效。</li>
+      </ul>
+    </div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 980 210" width="100%" role="img" aria-label="知识按需消费链路">
+      <defs><marker id="ar3" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#527b75"/></marker></defs>
+      <style>.k0{fill:#fff;stroke:#9bbab1;stroke-width:1.4}.kt{font-size:13.5px;font-weight:650}.ks{font-size:11px;fill:#5f767b}</style>
+      <g><rect x="18" y="30" width="150" height="72" rx="10" class="k0"/><text x="36" y="58" class="kt">来源登记</text><text x="36" y="80" class="ks">代码仓/文档/经验库</text></g>
+      <g><rect x="198" y="30" width="150" height="72" rx="10" class="k0"/><text x="216" y="58" class="kt">发现候选</text><text x="216" y="80" class="ks">权限+版本+语义过滤</text></g>
+      <g><rect x="378" y="30" width="150" height="72" rx="10" class="k0"/><text x="396" y="58" class="kt">选择方案</text><text x="396" y="80" class="ks">候选+排除理由+冲突</text></g>
+      <g><rect x="558" y="30" width="150" height="72" rx="10" class="k0"/><text x="576" y="58" class="kt">准备基线</text><text x="576" y="80" class="ks">prepared ≠ 已消费</text></g>
+      <g><rect x="738" y="30" width="120" height="72" rx="10" class="k0" style="stroke:#187361;stroke-width:1.6;fill:#edf6f2"/><text x="752" y="58" class="kt" fill="#134f43">实际装载</text><text x="752" y="80" class="ks">重验权限·回执</text></g>
+      <g><rect x="888" y="30" width="76" height="72" rx="10" class="k0"/><text x="900" y="58" class="kt">留痕</text><text x="900" y="80" class="ks">引用/验证</text></g>
+      <line x1="168" y1="66" x2="192" y2="66" stroke="#527b75" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <line x1="348" y1="66" x2="372" y2="66" stroke="#527b75" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <line x1="528" y1="66" x2="552" y2="66" stroke="#527b75" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <line x1="708" y1="66" x2="732" y2="66" stroke="#527b75" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <line x1="858" y1="66" x2="882" y2="66" stroke="#527b75" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <rect x="18" y="140" width="946" height="50" rx="10" fill="#fbf5e9" stroke="#ac7727" stroke-width="1.2"/>
+      <text x="40" y="171" font-size="12.5" fill="#7a5417">每一步分开记：检索不等于选择，装载不等于采纳，采纳不等于验证。任务跑成功了，也不能反推"用到的知识就是对的"。</text>
+    </svg>
+    <figcaption>图 3 · 知识进入任务：正文留在来源，平台只做索引和装配，按需取用</figcaption>
+  </figure>
+</section>
+
+<!-- ===================== 3 四化 ===================== -->
+<section id="s3">
+  <h2><span class="num">04</span>规范化、可度量、可扩展、可进化</h2>
+  <p class="sub">这四个词各有一套具体机制在支撑，不是宣传语。</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:0">规范化</h3>
+      <ul>
+        <li>跨系统的任务按 SR 编号等业务属性关联。关联规则和人工修正都要审核，批过的人工修正不会被后续重算覆盖。</li>
+        <li>场景 SOP 模板化：必选步骤删不掉，可选步骤按项目裁剪，确认后就是本次流程依据。</li>
+        <li>资产发布、知识固化、改进发布与回退，统一在一个裁决面处理，等待裁决的事项进个人待办队列。</li>
+        <li>质量检查分"必须满足"和"建议改进"两档，必选项没过或缺证据，就发不出去、结果确认不了。走例外要写清理由、范围、有效期并审批，原来的"未通过"记录不改写。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">可度量</h3>
+      <ul>
+        <li>执行过程逐条追加留痕：做了什么步骤、调了什么、人工在哪介入、产出了什么、实际用了哪些知识。</li>
+        <li>Token / Credit 在执行端、产业网关、公司侧三处各留原始记录，对账去重，缺的和对不上的单独列出来，不充数。</li>
+        <li>分析可以按产品、空间、需求、资产版本、模型切片比较任务量、返工、人工介入、耗时、消耗，点进去能看到证据。</li>
+        <li>指标口径带版本，算的什么、覆盖哪段、截止到什么时候都写明。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">可扩展</h3>
+      <ul>
+        <li>新团队、新业务建个子空间就能继承配置；要用现成资产，订阅即可。</li>
+        <li>定制靠派生，不改写上游；多个资产可以打包锁定整体版本。</li>
+        <li>外部系统一个一个接：每个系统的接入范围、字段映射、同步、回执单独登记建设，不要求对方改造。</li>
+        <li>同一事实只有一个写入方，新增能力靠挂接，不动既有职责。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">可进化</h3>
+      <ul>
+        <li>分析发现的线索、任务里提炼的经验，先进"候选"，有人立项才启动验证。系统只提议，不自己生效。</li>
+        <li>改进事项走：问题候选 → 人工立项 → 评测验证 → 审核发布 → 上线观察 → 回退或继续。发布成功只说明上线了，观察达标才算改进成功。</li>
+        <li>评测控制变量：先只加版本/状态约束，再加片段装配，再试单个增强项；任务、模型、环境、标准固定，不把一揽子改动说成单项收益。</li>
+        <li>授权案例脱敏、标注、人工入集，冻结成版本化数据集；验证集滚动更新，避免对着同一批题刷分。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4 作业流程 ===================== -->
+<section id="s4">
+  <h2><span class="num">05</span>一次作业从头到尾怎么走</h2>
+  <p class="sub">业务场景 → Harness 规划 → 小队建设 → 任务执行 → 结果度量和看护 → 自进化。</p>
+
+  <div class="flow">
+    <div class="step"><span class="no">1</span><b>业务场景</b><small>SOP 裁剪确认，SR 是最小交付单元</small></div>
+    <div class="step"><span class="no">2</span><b>Harness 规划</b><small>空间装配、环境匹配、上下文方案</small></div>
+    <div class="step"><span class="no">3</span><b>小队建设</b><small>组 Agent Teams，按职责装载知识</small></div>
+    <div class="step"><span class="no">4</span><b>任务执行</b><small>受管执行，断点转人工，重试有上限</small></div>
+    <div class="step"><span class="no">5</span><b>度量和看护</b><small>留痕、分析、用量对账、监控</small></div>
+    <div class="step" style="border-color:var(--teal);background:var(--teal-soft)"><span class="no">6</span><b>自进化</b><small>候选 → 立项 → 评测 → 发布 → 观察</small></div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 980 400" width="100%" role="img" aria-label="闭环示意图">
+      <defs><marker id="ar4" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#187361"/></marker></defs>
+      <style>.f1{fill:#fff;stroke:#9bbab1;stroke-width:1.4}.f2{fill:#edf6f2;stroke:#187361;stroke-width:1.7}.ft{font-size:14px;font-weight:650}.fs{font-size:11px;fill:#5f767b}.fe{stroke:#187361;stroke-width:2;fill:none;marker-end:url(#ar4)}</style>
+      <g><rect x="30" y="30" width="180" height="74" rx="11" class="f1"/><text x="52" y="60" class="ft">① 业务场景</text><text x="52" y="84" class="fs">SOP 裁剪 · 需求/问题登记</text></g>
+      <g><rect x="270" y="30" width="180" height="74" rx="11" class="f1"/><text x="292" y="60" class="ft">② Harness 规划</text><text x="292" y="84" class="fs">空间装配 · 环境 · 选择方案</text></g>
+      <g><rect x="510" y="30" width="180" height="74" rx="11" class="f1"/><text x="532" y="60" class="ft">③ 小队建设</text><text x="532" y="84" class="fs">组队 · 按职责装载知识</text></g>
+      <g><rect x="750" y="30" width="180" height="74" rx="11" class="f1"/><text x="772" y="60" class="ft">④ 任务执行</text><text x="772" y="84" class="fs">受管执行 · 人工接续</text></g>
+      <line x1="212" y1="67" x2="264" y2="67" class="fe"/>
+      <line x1="452" y1="67" x2="504" y2="67" class="fe"/>
+      <line x1="692" y1="67" x2="744" y2="67" class="fe"/>
+      <g><rect x="750" y="180" width="180" height="74" rx="11" class="f1"/><text x="772" y="210" class="ft">⑤ 度量与看护</text><text x="772" y="234" class="fs">留痕 · 分析 · 监控 · 用量</text></g>
+      <g><rect x="30" y="180" width="660" height="74" rx="11" class="f2"/><text x="52" y="210" class="ft" fill="#134f43">⑥ 自进化：候选 → 人工立项 → 控制变量评测 → 审核发布 → 上线观察</text><text x="52" y="234" class="fs">发布成功不等于改进成功；退化就回退；评测数据集冻结版本、滚动更新</text></g>
+      <path d="M840 104 V174" class="fe"/>
+      <path d="M744 217 H700" class="fe"/>
+      <path d="M660 254 V330 H960 V12 H360 V24" stroke="#ac7727" stroke-width="2" fill="none" stroke-dasharray="7 5" marker-end="url(#ar4)"/>
+      <text x="700" y="322" font-size="12.5" fill="#7a5417" font-weight="650">改好的资产、策略、小队配置，经差异确认后用到下一轮装配</text>
+    </svg>
+    <figcaption>图 4 · 六段闭环：每段都留下证据，证据喂给进化，进化结果回到下一轮装配</figcaption>
+  </figure>
+
+  <div class="card">
+    <h3 style="margin-top:0">各段做什么</h3>
+    <table>
+      <tr><th style="width:110px">阶段</th><th>内容</th><th style="width:280px">边界</th></tr>
+      <tr><td><b>① 业务场景</b></td><td>拿确认过的场景 SOP 裁剪出本次流程；各系统按同一 SOP 拆任务、标步骤，平台据此分析步骤衔接和缺项。分析结果只是提示，不会自动拦你。</td><td>必选步骤不能删；SR 只汇总进展，不另建验收。</td></tr>
+      <tr><td><b>② Harness 规划</b></td><td>装配这次作业的"挽具"：空间圈定产品和版本范围、订阅要用的资产；按需求匹配池化运行环境和构建镜像；生成上下文选择方案——哪些候选、为什么排除、有什么冲突，都写明。</td><td>范围外对象置灰；配置变化先看差异再确认。</td></tr>
+      <tr><td><b>③ 小队建设</b></td><td>组 Agent Teams 分好工：做分析设计的拿现行规格和决策记录，写代码的拿批准目标和相关代码，做测试的拿验收场景和契约，协调的只拿目标、分工、结论和来源索引——不是把所有材料塞给每个人。</td><td>角色只是分工，不产生新权限；全员沿用发起人的授权范围。</td></tr>
+      <tr><td><b>④ 任务执行</b></td><td>AI、数字化作业和人工步骤在一个视图里推进。AI 卡住时保留现场、转成人工待办，人批一下、补点信息就能继续。临时故障有限重试，业务失败或拿不准就转人。代码生成 → 构建验证 → 失败反馈 → 修正，轮次有限。</td><td>一个任务默认只有一个活跃执行；结果由人确认后才回写来源系统。</td></tr>
+      <tr><td><b>⑤ 度量与看护</b></td><td>过程和知识消费全部留痕；按产品、空间、需求、资产版本、模型切着看使用、质量、耗时、消耗，能一路点到证据；三侧用量对账；来源同步和平台自身的健康有人看护。</td><td>缺的和归因不了的单独列，不摊平、不凑均值。</td></tr>
+      <tr><td><b>⑥ 自进化</b></td><td>线索和经验成候选，人工立项后做控制变量评测，审核通过才发布，上线后观察效果：达标关闭，退化回退。评测样本来自授权案例，脱敏、标注、人工入集、冻结版本。</td><td>单次成功和模型自己的总结，不能直接变成共享规则。</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== 5 原则 ===================== -->
+<section id="s5">
+  <h2><span class="num">06</span>几条贯穿始终的原则</h2>
+  <div class="grid g2">
+    <div class="card"><h3 style="margin-top:0">事实不搬家</h3><p>业务事实归来源系统，平台维护关联、配置、执行和分析记录，对外操作以来源回执为准。两边不会各记一本账。</p></div>
+    <div class="card"><h3 style="margin-top:0">审批人不能是提交人</h3><p>资产发布、标准发布、例外审批都要求审核人和提交人分离；所有操作落到发起用户头上，公共账号不能拿来放大权限。</p></div>
+    <div class="card"><h3 style="margin-top:0">变化不静默生效</h3><p>父配置更新、上游资产更新、知识来源变化，一律先提示差异、等人确认。改进候选要立项，发布成功还要观察达标。没有"悄悄就变了"这回事。</p></div>
+    <div class="card"><h3 style="margin-top:0">知识按需取用</h3><p>正文留在来源系统，任务执行时按需装配。准备装载和实际装载分开记，检索不等于用过，用过不等于验证过。</p></div>
+  </div>
+</section>
+
+<footer>
+  CoreALM-Next 介绍说明 · 静态页面，可独立分发 · 依据系统设计方案 v1.18 与研发作业知识工程实施方案 v1.0 整理 · 2026-11-17
+</footer>
+
+</div>
+</body>
+</html>
