@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CoreALM-Next 原型功能指导</title>
+<style>
+:root{--ink:#202927;--muted:#6d7a72;--line:#dfe5e1;--bg:#fafbfa;--soft:#f2f5f3;--teal:#187361;--teal-soft:#e5f2ee;--amber:#a8771f;--amber-soft:#fdf6e9;--red:#b25a4d;--red-soft:#faeeeb;--blue:#4d75a0;--blue-soft:#edf2f7;--card:#fff;--mark:#e84855}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:var(--ink);background:var(--bg);font-size:14px;line-height:1.8}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 32px 80px}
+h1{font-size:30px;letter-spacing:-.5px;margin-bottom:6px}
+.subtitle{color:var(--muted);font-size:14px;margin-bottom:36px}
+h2{font-size:20px;margin:48px 0 18px;padding-bottom:10px;border-bottom:2px solid var(--teal);display:flex;align-items:center;gap:10px}
+h2 .num{background:var(--teal);color:#fff;font-size:13px;width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+h3{font-size:15px;margin:18px 0 10px;color:var(--teal)}
+p{margin-bottom:10px;color:#3d4a43}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:16px}
+.card.highlight{border-left:4px solid var(--teal)}
+.tip{background:var(--teal-soft);border-radius:8px;padding:12px 16px;font-size:13px;margin:10px 0;display:flex;gap:8px;align-items:flex-start}
+.tip::before{content:'💡';flex-shrink:0}
+.tip.warn{background:var(--amber-soft)}
+.tip.warn::before{content:'⚠️'}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+th{background:var(--soft);text-align:left;padding:10px 14px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+td{padding:10px 14px;border:1px solid var(--line);vertical-align:top}
+kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 6px;font-size:12px;font-family:Consolas,monospace;background:#fff;color:var(--muted)}
+.shot-box{position:relative;margin:16px 0;border-radius:10px;overflow:hidden;border:1px solid var(--line);box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.shot-box img{display:block;width:100%;height:auto}
+.shot-cap{font-size:12px;color:var(--muted);text-align:center;padding:8px 0 2px}
+.an{position:absolute;pointer-events:none}
+.an.box{border:3px solid var(--mark);border-radius:6px;box-shadow:0 0 0 2px rgba(232,72,85,.15)}
+.an.box.teal{border-color:var(--teal);box-shadow:0 0 0 2px rgba(24,115,97,.15)}
+.an.box.blue{border-color:var(--blue);box-shadow:0 0 0 2px rgba(77,117,160,.15)}
+.an.box.amber{border-color:var(--amber);box-shadow:0 0 0 2px rgba(168,119,31,.15)}
+.an-label{position:absolute;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;line-height:1.4;pointer-events:none;z-index:10}
+.an-label.red{background:var(--mark)}
+.an-label.teal{background:var(--teal)}
+.an-label.blue{background:var(--blue)}
+.an-label.amber{background:var(--amber)}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:28px}
+.toc-title{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-bottom:10px}
+.toc ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:4px}
+.toc a{color:var(--teal);text-decoration:none;font-size:13px;padding:4px 0;display:block}
+.footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);text-align:center}
+.legend{display:flex;gap:16px;align-items:center;padding:10px 16px;background:var(--soft);border-radius:8px;margin:12px 0;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:16px;height:16px;border-radius:3px;border:2.5px solid}
+.legend .l-red{border-color:var(--mark)}
+.legend .l-teal{border-color:var(--teal)}
+.legend .l-blue{border-color:var(--blue)}
+.legend .l-amber{border-color:var(--amber)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>CoreALM-Next 原型功能指导</h1>
+<p class="subtitle">AI-Native 研发作业工作台 · 交互演示版 · 2026-10-23</p>
+<div class="legend">
+<b>标注：</b><span><i class="l-red"></i>操作</span><span><i class="l-teal"></i>功能</span><span><i class="l-blue"></i>信息</span><span><i class="l-amber"></i>注意</span>
+</div>
+
+<!-- ============ S1 ============ -->
+<h2 id="s1"><span class="num">1</span>产品主空间与切换</h2>
+<div class="card highlight"><p>以<b>产品</b>划分主空间，切换 = 换工作上下文。平台能力不随切换消失。</p></div>
+<div class="shot-box"><img src="guide-s1-switcher-open.png" alt="切换菜单">
+<div class="an box teal" style="left:0.9%;top:11.9%;width:12.9%;height:5.3%"></div>
+<div class="an-label teal" style="left:0.9%;top:8% ">① 点击展开</div>
+<div class="an box" style="left:1.3%;top:17.6%;width:12.1%;height:17.6%"></div>
+<div class="an-label red" style="left:15%;top:19%">② 选择产品</div>
+<div class="an box blue" style="left:1.3%;top:28.6%;width:12.1%;height:6.1%"></div>
+<div class="an-label blue" style="left:15%;top:30%">③ 管理空间配置</div>
+</div>
+<p class="shot-cap">主空间切换菜单</p>
+<table><tr><th>跟随切换</th><th>不变（平台级）</th></tr><tr><td>版本总览/子空间树/订阅/我的工作</td><td>资产/治理/运行时/经验/通知</td></tr></table>
+
+<!-- ============ S2 ============ -->
+<h2 id="s2"><span class="num">2</span>我的工作（个人工作聚合）</h2>
+<div class="card highlight"><p>按"下一动作归谁"组织的个人待办。七个分组，挂起等答置顶不可折叠。</p></div>
+<div class="shot-box"><img src="guide-s2-mywork-full.png" alt="我的工作">
+<div class="an box teal" style="left:16.9%;top:24.3%;width:80.9%;height:3.5%"></div>
+<div class="an-label teal" style="left:16.9%;top:20%">七分组 tabs</div>
+<div class="an box" style="left:54.2%;top:29.8%;width:6.6%;height:2.9%"></div>
+<div class="an-label red" style="left:61.5%;top:29.8%">空间facet筛选</div>
+<div class="an box amber" style="left:16.9%;top:34.2%;width:80.9%;height:19.1%"></div>
+<div class="an-label amber" style="left:16.9%;top:55%">今日焦点（≤5条+等答行）</div>
+<div class="an box blue" style="left:16.9%;top:54.7%;width:80.9%;height:3.3%"></div>
+<div class="an-label blue" style="left:50%;top:59%">同类合并行</div>
+<div class="an box teal" style="left:16.9%;top:63.2%;width:61.1%;height:13.1%"></div>
+<div class="an-label teal" style="left:16.9%;top:78%">待我处理组（含下一动作投影）</div>
+</div>
+<p class="shot-cap">全貌：七分组 + 焦点区 + 合并行 + facet + 下一动作</p>
+
+<h3>空间筛选效果</h3>
+<div class="shot-box"><img src="guide-s2c-facet-filter.png" alt="筛选">
+<div class="an box" style="left:54.2%;top:29.8%;width:6.6%;height:2.9%"></div>
+<div class="an-label red" style="left:61.5%;top:29.8%">已选"服务研发"</div>
+<div class="an box teal" style="left:16.9%;top:34%;width:61%;height:25%"></div>
+<div class="an-label teal" style="left:16.9%;top:30%">列表只剩该空间事务</div>
+</div>
+<p class="shot-cap">筛选后——挂起等答不受影响</p>
+
+<!-- ============ S3 ============ -->
+<h2 id="s3"><span class="num">3</span>任务作业台</h2>
+<div class="shot-box"><img src="guide-s3-task-chip.png" alt="任务页">
+<div class="an box teal" style="left:16.9%;top:22.8%;width:80.9%;height:9.8%"></div>
+<div class="an-label teal" style="left:16.9%;top:18.8%">四维状态带</div>
+<div class="an box" style="left:16.9%;top:33.7%;width:80.9%;height:4.5%"></div>
+<div class="an-label red" style="left:50%;top:34.7%">下一步芯片</div>
+<div class="an box blue" style="left:16.9%;top:54.8%;width:62%;height:3.5%"></div>
+<div class="an-label blue" style="left:16.9%;top:51%">五页签</div>
+</div>
+<p class="shot-cap">任务页——四维状态 + 芯片 + 五页签</p>
+
+<!-- ============ S4 ============ -->
+<h2 id="s4"><span class="num">4</span>执行过程与 Trace</h2>
+<h3>空态</h3>
+<div class="shot-box"><img src="guide-s4-trace-empty.png" alt="空态">
+<div class="an box teal" style="left:16.9%;top:82%;width:80.9%;height:18%"></div>
+<div class="an-label teal" style="left:16.9%;top:78%">空态引导卡片</div>
+<div class="an box" style="left:18.9%;top:98%;width:76.9%;height:3%"></div>
+<div class="an-label red" style="left:50%;top:94%">三个入口按钮</div>
+</div>
+<p class="shot-cap">无记录时——引导你怎么开始</p>
+
+<h3>执行中</h3>
+<div class="shot-box"><img src="guide-s4b-trace-live.png" alt="执行中">
+<div class="an box" style="left:16.9%;top:66.2%;width:80.9%;height:8.5%"></div>
+<div class="an-label red" style="left:16.9%;top:62%">实时进度条+步骤指示</div>
+<div class="an box teal" style="left:17.8%;top:93%;width:32.5%;height:7%"></div>
+<div class="an-label teal" style="left:51%;top:94%">时间线（视口内部分）</div>
+</div>
+<p class="shot-cap">执行中——进度条实时推进</p>
+
+<h3>完成后</h3>
+<div class="shot-box"><img src="guide-s4c-trace-timeline.png" alt="完成">
+<div class="an box teal" style="left:17.8%;top:81%;width:32.5%;height:19%"></div>
+<div class="an-label teal" style="left:51%;top:82%">带连线时间线</div>
+<div class="an box blue" style="left:51.3%;top:79.7%;width:46.5%;height:15%"></div>
+<div class="an-label blue" style="left:51.3%;top:76%">详情面板</div>
+</div>
+<p class="shot-cap">完成后——事件按类型着色</p>
+
+<!-- ============ S5 ============ -->
+<h2 id="s5"><span class="num">5</span>空间装配</h2>
+<div class="shot-box"><img src="guide-s5-spaces-config.png" alt="空间装配">
+<div class="an box teal" style="left:16.9%;top:18.4%;width:13.2%;height:17.3%"></div>
+<div class="an-label teal" style="left:31%;top:19%">空间树</div>
+<div class="an box" style="left:31.7%;top:18.4%;width:66.1%;height:10.9%"></div>
+<div class="an-label red" style="left:31.7%;top:14.5%">主空间范围声明</div>
+<div class="an box blue" style="left:33.1%;top:48.1%;width:63.4%;height:21.4%"></div>
+<div class="an-label blue" style="left:50%;top:44%">条件筛选区域</div>
+</div>
+<p class="shot-cap">条件筛选——发布前有预检</p>
+
+<!-- ============ S6 ============ -->
+<h2 id="s6"><span class="num">6</span>团队主页</h2>
+<div class="shot-box"><img src="guide-s6-team-page.png" alt="团队">
+<div class="an box" style="left:16.9%;top:37.6%;width:61.1%;height:25.5%"></div>
+<div class="an-label red" style="left:16.9%;top:33.6%">团队事务投影</div>
+</div>
+<p class="shot-cap">团队主页——任务投影+依赖环节+资产</p>
+
+<!-- ============ S7 ============ -->
+<h2 id="s7"><span class="num">7</span>AI 资产中心</h2>
+<div class="shot-box"><img src="guide-s7-assets.png" alt="资产">
+<div class="an box" style="left:16.9%;top:18.4%;width:80.9%;height:5.1%"></div>
+<div class="an-label red" style="left:16.9%;top:14.5%">视角切换</div>
+<div class="an box teal" style="left:16.9%;top:54.6%;width:80.9%;height:25%"></div>
+<div class="an-label teal" style="left:16.9%;top:50.6%">资产卡片网格</div>
+</div>
+<p class="shot-cap">双视角+订阅管理</p>
+
+<!-- ============ S8 ============ -->
+<h2 id="s8"><span class="num">8</span>治理中心</h2>
+<div class="shot-box"><img src="guide-s8-governance.png" alt="治理">
+<div class="an box teal" style="left:16.9%;top:31.7%;width:80.9%;height:3.5%"></div>
+<div class="an-label teal" style="left:16.9%;top:27.8%">四页签</div>
+<div class="an box" style="left:17%;top:49%;width:80.8%;height:11.1%"></div>
+<div class="an-label red" style="left:17%;top:45%">治理事项列表</div>
+</div>
+<p class="shot-cap">三道门·一门一裁决人</p>
+<div class="tip warn">例外备案 ≠ 通过。裁决理由必填。</div>
+
+<!-- ============ S9 ============ -->
+<h2 id="s9"><span class="num">9</span>运行时</h2>
+<div class="shot-box"><img src="guide-s9-runtimes.png" alt="运行时">
+<div class="an box teal" style="left:16.9%;top:31.7%;width:80.9%;height:3.5%"></div>
+<div class="an-label teal" style="left:16.9%;top:27.8%">运行时页签</div>
+</div>
+<p class="shot-cap">每次执行冻结运行时版本</p>
+
+<!-- ============ S10 ============ -->
+<h2 id="s10"><span class="num">10</span>经验中心</h2>
+<div class="shot-box"><img src="guide-s10-experience.png" alt="经验">
+<div class="an box teal" style="left:16.9%;top:34.3%;width:80.9%;height:20%"></div>
+<div class="an-label teal" style="left:16.9%;top:30.3%">经验卡片</div>
+</div>
+<p class="shot-cap">候选→评审→发布→引用</p>
+
+<!-- ============ S11 ============ -->
+<h2 id="s11"><span class="num">11</span>运营</h2>
+<div class="shot-box"><img src="guide-s11-operations.png" alt="运营">
+<div class="an box" style="left:16.9%;top:18.4%;width:80.9%;height:8.1%"></div>
+<div class="an-label red" style="left:16.9%;top:14.5%">双域切换按钮</div>
+</div>
+<p class="shot-cap">来源健康+质量效率+飞轮</p>
+
+<!-- ============ S12 ============ -->
+<h2 id="s12"><span class="num">12</span>空间管理</h2>
+<div class="shot-box"><img src="guide-s12-space-manage.png" alt="空间管理">
+<div class="an box teal" style="left:24.1%;top:35.5%;width:51.7%;height:35.8%"></div>
+<div class="an-label teal" style="left:24.1%;top:31.5%">JSON 编辑器</div>
+<div class="an box" style="left:70.2%;top:75.6%;width:5.7%;height:3%"></div>
+<div class="an-label red" style="left:76.5%;top:75.6%">保存</div>
+<div class="an box amber" style="left:64.6%;top:75.6%;width:4.9%;height:3%"></div>
+<div class="an-label amber" style="left:58%;top:75.6%">恢复默认</div>
+</div>
+<p class="shot-cap">增删主空间/子空间——校验保存立即生效</p>
+
+<!-- ============ S13 ============ -->
+<h2 id="s13"><span class="num">13</span>键盘</h2>
+<div class="card">
+<table>
+<tr><th style="width:100px">按键</th><th>功能</th></tr>
+<tr><td><kbd>/</kbd></td><td>全局搜索</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>分层关闭：弹窗→全图→侧栏</td></tr>
+<tr><td><kbd>←→</kbd></td><td>页签切换</td></tr>
+</table>
+</div>
+<div class="card"><p>🀄 中文输入法安全 · ✏️ 草稿保持 · 🔄 焦点恢复</p></div>
+
+<!-- ============ S14 ============ -->
+<h2 id="s14"><span class="num">14</span>今日焦点与合并</h2>
+<div class="shot-box"><img src="guide-s14-focus-merged.png" alt="焦点+合并">
+<div class="an box amber" style="left:16.9%;top:34.2%;width:80.9%;height:24.5%"></div>
+<div class="an-label amber" style="left:16.9%;top:30.2%">今日焦点区</div>
+<div class="an box" style="left:18.1%;top:38.3%;width:78.6%;height:4.9%"></div>
+<div class="an-label red" style="left:50%;top:44.3%">等答行（红底·不占额度）</div>
+<div class="an box teal" style="left:16.9%;top:60.2%;width:80.9%;height:3.3%"></div>
+<div class="an-label teal" style="left:16.9%;top:64.5%">同类合并行</div>
+<div class="an box blue" style="left:16.9%;top:64.9%;width:80.9%;height:2.8%"></div>
+<div class="an-label blue" style="left:50%;top:68.9%">归档暂缓提示</div>
+</div>
+<p class="shot-cap">执行成功未交付——焦点+合并+归档提示</p>
+
+<div class="footer">CoreALM-Next 交互原型 · 2026-10</div>
+</div>
+</body>
+</html>

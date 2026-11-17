@@ -22,6 +22,7 @@ status: active
 - [[../50-Docs/02 ai-native工作台/CoreALM-Next知识工程建设任务清单|知识工程建设任务清单]]
 - [[../50-Docs/03 知识工程/CoreALM-Next知识目录与任务续作设计|知识目录与任务续作设计 v1.0]]（2026-11-11 新增）
 - [[../50-Docs/03 知识工程/SkillOpt融合分析|SkillOpt融合分析]]（2026-11-13 新增：知识自进化引擎对接 KE 治理流水线）
+- [[../40-Prototype/corealm-next-ui/README|交互原型 corealm-next-ui]]（2026-11-17 归档：工作台交互演示版 + 14 节功能指导 + 18 张场景截图）
 
 ## 关键决策记录
 | 日期 | 决策 | 依据 |
