@@ -1814,7 +1814,7 @@ function decisionInboxView(){
  <p>${d.ask}</p>
  <p class="tiny">AI 推荐：<strong>${d.rec}</strong>（置信度 ${d.conf}%）—— ${d.why}</p>
  <p class="tiny" style="color:var(--amber,#b45309)">⚠ 反方证据：${d.contra}</p>
- <p class="tiny muted">${d.src}</p></div>
+ <p class="tiny muted">${d.src}</p><p class="tiny muted">队列位：<button data-action="navigate" data-value="work" class="aw-inline-link">我的工作 · 待我决策</button>${({'DP-111':'GK-114','DP-110':'GI-056'})[d.id]?' · 治理队列同对象 '+({'DP-111':'GK-114','DP-110':'GI-056'})[d.id]:''}（收件箱 ⊂ 待我决策）</p></div>
  <div class="flex">${button('打开决策包','decide-open','primary small',`data-value="${d.id}"`)}</div></div></div>`).join('')}
  <div class="callout">${icon('info')}决策包 = 事项 + 证据 + 可解释推荐 + 反方证据；批准/否决（理由必填）/补充信息/跳作业台现场四类操作均留痕。自动化程度分级演进（L2→L3 白名单自动+上线观察），每级可回退。</div></section>`;
 }
@@ -1822,9 +1822,9 @@ Object.assign(actions,{
  'decide-open':el=>{const d=decisionPkgs.find(x=>x.id===el.dataset.value);modal(`${d.id} ${d.kind} · 决策包`,`<p>${d.ask}</p>
  <dl class="detail-pairs"><dt>AI 推荐</dt><dd>${d.rec}（置信度 ${d.conf}%）</dd><dt>推荐依据</dt><dd>${d.why}</dd><dt>反方证据</dt><dd style="color:var(--amber,#b45309)">${d.contra}</dd><dt>来源</dt><dd>${d.src}</dd></dl>
  <p class="tiny muted">操作留痕：批准 / 否决（理由必填，回写任务现场）/ 补充信息（Agent 续作时消费）/ 我要亲自看（跳作业台现场）。AI 永远不是裁决人。</p>`,
- button('批准','decide-approve')+button('否决·理由必填','decide-reject')+button('补充信息','decide-info')+button('关闭','close-modal'));},
- 'decide-approve':()=>{closeModal();render();toast('已批准：裁决留痕已写入任务现场，Agent 将继续推进');},
- 'decide-reject':()=>{closeModal();render();toast('已登记否决：需填写理由，Agent 收到后转入整改分支');},
+ button('批准','decide-approve','primary small',`data-value="${d.id}"`)+button('否决·理由必填','decide-reject','small',`data-value="${d.id}"`)+button('补充信息','decide-info')+button('关闭','close-modal'));},
+ 'decide-approve':el=>{const id=el.dataset.value;state.dpDone=state.dpDone||{};state.dpDone[id]='批准';const map={'DP-111':'GK-114','DP-110':'GI-056'};if(map[id]){const q=govAssetQueue.find(x=>x.id===map[id]);if(q)q.st='已裁决（收件箱批准）';}closeModal();render();toast('已批准：收件箱条目闭环、治理队列同对象状态联动更新、裁决留痕写入任务现场——决策动作回写而非只弹提示。');},
+ 'decide-reject':el=>{const id=el.dataset.value;state.dpDone=state.dpDone||{};state.dpDone[id]='否决';closeModal();render();toast('已登记否决：需填写理由，Agent 收到后转入整改分支');},
  'decide-info':()=>{closeModal();render();toast('已打开补充信息表单：Agent 续作时将消费你补充的上下文');}
 });
 // ===== 作业现场（L2形态工作台）：现场条 + 下一步动作区，细节tabs降为证据层 =====
@@ -1870,7 +1870,7 @@ function taskSelectorView(){
  const recent=view.taskEmptyDemo?[]:workItems.filter(t=>t.id!=='WK-204').slice(0,3);
  return heading('TASK WORKBENCH','任务作业台','这里不是任务清单——清单在「我的工作」。作业台只放你打开的现场：正在进行的会话，随时恢复上下文。',button(view.taskEmptyDemo?'恢复演示数据':'模拟：没有任何现场','task-empty-demo','small'))+
  (view.taskEmptyDemo
- ?`<div class="panel"><div class="panel-body" style="text-align:center;padding:44px 20px">${icon('check')}<h3 style="margin:10px 0 6px">当前没有打开的现场</h3><p class="tiny muted" style="max-width:460px;margin:0 auto;line-height:1.9">没有进行中的会话。活都在别处：待办在「我的工作」，Agent 执行在「运营与进化」的观察窗，等外部的在「我的工作 · 等待依赖」。任务轮到你时，现场会在这里打开。</p><div class="flex" style="justify-content:center;gap:8px;margin-top:16px">${button('去「我的工作」选择任务','navigate','primary','data-value="work"')}${button('查看 Agent 执行观察窗','navigate','','data-value="operations"')}</div></div></div>`
+ ?`<div class="panel"><div class="panel-body" style="text-align:center;padding:44px 20px">${icon('check')}<h3 style="margin:10px 0 6px">当前没有打开的现场</h3><p class="tiny muted" style="max-width:460px;margin:0 auto;line-height:1.9">没有进行中的会话。活都在别处：待办与你责任内的 Agent 执行在「我的工作」（待我处理 / 智能执行中）；全局执行观察（含他人与平台侧）在「运营与进化」观察窗——两个镜头：责任队列内的执行 vs 全局遥测。等外部的在「我的工作 · 等待依赖」。任务轮到你时，现场会在这里打开。</p><div class="flex" style="justify-content:center;gap:8px;margin-top:16px">${button('去「我的工作」选择任务','navigate','primary','data-value="work"')}${button('查看 Agent 执行观察窗','navigate','','data-value="operations"')}</div></div></div>`
  :`<div class="section-label"><h2>打开的现场（1）</h2><span class="tiny muted">会话保持中 · 恢复即回到上次离开时的上下文</span></div>
  <div class="panel mb" style="border-left:3px solid #0f766e"><div class="panel-body"><div class="between"><div><strong>动态路由热更新 · 特性脚本调测</strong> <span class="mono tiny muted">WK-204 · CIDA-271</span><div class="flex" style="gap:6px;margin-top:6px">${badge('活跃 · 刚刚','teal',true)}${badge('现场已恢复就绪','green')}</div></div><div class="flex" style="gap:8px">${button('恢复现场 '+icon('arrow'),'task-open','primary','data-value="WK-204"')}</div></div><p class="tiny muted" style="margin-top:10px">上次离开：验证前置确认（交付 FD-028 待确认）。未决 2 项，外部副作用：无。</p></div></div>
  <div class="section-label"><h2>最近关闭的现场</h2><span class="tiny muted">重开会重新装配上下文（对应 resume.md 恢复读取顺序）</span></div>
@@ -1905,7 +1905,7 @@ function poView(){
   {lvl:'高',cls:'red',t:'特性脚本就绪率 78%，低于计划基线 90%',imp:'若维持当前速率，转测门预计延后 2–3 天；连带压缩回归窗口',adv:'启用 Script Agent 并行调测（引用经验：脚本自愈策略 v1.8.1，同类调测提速约 40%）；就绪率低于 80% 的特性明日风险会逐项过'},
   {lvl:'中',cls:'amber',t:'验证环境存在 rc3 残留，需匹配 rc4',imp:'转测后首轮验证可能复现已修复问题，浪费 1–2 天',adv:'11-24 装载窗口内预装载 rc4 并快照锁定；联动 WK-204 环境核验清单'},
   {lvl:'中',cls:'amber',t:'DTS 同步延迟，依赖确认滞后',imp:'2 项跨团队依赖未闭环，阻塞集成验证排序',adv:'对延迟项做人工核验并升级工单；恢复后自动回填（来源待补拉中）'}];
- return `<div class="stats">${stat('版本计划完成度','62<small>%</small>','8 项需求：2 交付 / 3 进行 / 3 待启动')}${stat('距转测门','12<small>天</small>','11-28 · 关键路径上阻塞 2 项')}${stat('活跃风险','3<small>项</small>','高 1 · 中 2 · 较上周 +1')}${stat('历史参考','+5<small>天</small>','R2.7 同期转测实际延迟')}</div>
+ return `<div style="border:1px solid rgba(15,118,110,.45);border-radius:12px;padding:12px 12px 2px;margin-bottom:10px"><div class="between mb"><strong>🧭 PO 聚合层 · 只读</strong>${badge('镜头视角 · 决策走我的工作','teal')}</div><div class="stats">${stat('版本计划完成度','62<small>%</small>','8 项需求：2 交付 / 3 进行 / 3 待启动')}${stat('距转测门','12<small>天</small>','11-28 · 关键路径上阻塞 2 项')}${stat('活跃风险','3<small>项</small>','高 1 · 中 2 · 较上周 +1')}${stat('历史参考','+5<small>天</small>','R2.7 同期转测实际延迟')}</div>
  <section class="panel mb"><div class="panel-head"><h2>版本计划 · 关键时间点</h2>${badge('R2.8 · 计划基线 v12','outline')}</div><div class="panel-body">
  <div class="timeline-inline">${ms.map(m=>`<span class="${m[2]==='current'?'active':''}" style="${m[2]==='key'?'color:var(--amber);font-weight:600':''}">${icon(m[2]==='done'?'check':m[2]==='current'?'play':'clock')} ${m[0]} ${m[1]}${m[2]==='key'?' · 关键':''}</span>`).join('<span style="color:#b8c2ba">→</span>')}</div>
  <div class="mt">
@@ -1923,7 +1923,7 @@ function poView(){
  <div class="risk-item"><div class="flex"><strong style="font-weight:550">R2.6 · 转准点交付</strong>${badge('正面参照','green')}</div>
  <p style="margin-top:6px">关键动作：提前 2 周环境冻结 + 双周依赖核对面。本版本可复用：环境冻结窗口已排入 11-24。</p></div>
  </div></section>
- <div class="callout">${icon('info')}<span>PO 视角为只读聚合：计划、风险、建议数据来自各模块的单一写入者（版本计划 / 风险登记 / 经验中心），建议动作引用历史版本的实际化解记录；决策与派发仍走各归属页面，不在此页直接改状态。</span></div>`;
+ <div class="callout">${icon('info')}<span>PO 视角为只读聚合：计划、风险、建议数据来自各模块的单一写入者（版本计划 / 风险登记 / 经验中心），建议动作引用历史版本的实际化解记录；决策与派发仍走各归属页面，不在此页直接改状态。</span></div></div><p class="tiny muted" style="margin-bottom:12px">↓ 以下为版本对象数据（角色无关）：所有视角看到同一份事实，PO 镜头只改变上方聚合与建议。</p>`;
 }
 Object.assign(actions,{
  
@@ -1986,10 +1986,15 @@ const linkCatalog=[
 Object.assign(actions,{
  'link-add':()=>{modal('关联配置对象 · 从同步目录选择',`
  <p class="tiny muted" style="margin-bottom:10px">目录来自连接器同步（稳定来源身份+权限映射）。可选=自助关联；置灰=不在本空间来源范围内。手填 URL 建立关联不在此提供——新事实走接入流程。</p>
- ${linkCatalog.map((l,i)=>`<div class="risk-item" style="opacity:${l.ok?1:.45}"><div class="flex"><span class="mini-icon">${l.ic}</span><strong style="font-weight:550">${l.t}</strong>${l.virtual?badge('虚拟项目·自由建','teal'):badge(l.ok?'可关联':'越界置灰',l.ok?'green':'outline')}</div><p class="tiny muted" style="margin-top:4px">${l.pin} · ${l.src}${l.why?'——'+l.why:''}</p>${l.ok?button('选择 → 差异确认','link-pick','small','data-value="'+i+'"'):`<div class="tiny muted">${button('查看来源范围','space-root','small text')}（扩展范围需管理者操作）</div>`}</div>`).join('')}
+ ${linkCatalog.map((l,i)=>`<div class="risk-item" style="opacity:${l.ok?1:.45}"><div class="flex"><span class="mini-icon">${l.ic}</span><strong style="font-weight:550">${l.t}</strong>${l.virtual?badge('虚拟项目·自由建','teal'):badge(l.ok?'可关联':'越界置灰',l.ok?'green':'outline')}</div><p class="tiny muted" style="margin-top:4px">${l.pin} · ${l.src}${l.why?'——'+l.why:''}</p>${l.ok?button('选择 → 差异确认','link-pick','small','data-value="'+i+'"'):`<div class="tiny muted">${button('查看来源范围','link-scope','small text')}（扩展范围需管理者操作）</div>`}</div>`).join('')}
  <div class="callout mt">${icon('info')}<span>没有想要的来源？<button data-action="link-apply" class="aw-inline-link">申请新来源接入</button> ——接入管理员配置连接器后对象进目录，你再回来选。"新增事实"与"使用事实"分离。</span></div>`,button('关闭','close-modal'),true);},
  'link-pick':el=>{const l=linkCatalog[+el.dataset.value];state.customLinks=(state.customLinks||[]).concat([{ic:l.ic,t:l.t,pin:l.pin,src:l.src}]);closeModal();render();toast('已加入关联（待空间管理者确认生效）：成员可提议关联，管理者确认后进入有效配置——对齐"父配置变化→确认采用"模式。');},
  'link-apply':()=>{modal('申请新来源接入',`<dl class="detail-pairs"><dt>适用场景</dt><dd>目录中不存在的新代码仓 / 服务 / 文档平台</dd><dt>流程</dt><dd>填写来源地址与用途 → M7 接入管理员配置连接器（builtin 或审核后自定义）→ 权限映射与读取回执验证 → 对象进入目录 → 你回空间装配页选择关联</dd><dt>为什么不放开手填</dt><dd>手填 URL 无稳定来源身份：仓库迁移后引用悬空、权限检查失去事实基础、单一写入者被破坏。关联是引用，事实必须归源系统。</dd></dl>`,button('关闭','close-modal'));},
+});
+
+
+Object.assign(actions,{
+ 'link-scope':()=>{modal('本空间的来源范围',`<dl class="detail-pairs"><dt>来源范围</dt><dd>产品：云网服务平台 · 版本 R2.8 · 六个作业系统（CIDA / CloudPipeline / 代码托管 / 制品库 / DTS / 云见）</dd><dt>为何置灰</dt><dd>client-x/infra 属客户资产，不在上述范围内——目录可见 ≠ 可关联</dd><dt>如何扩展</dt><dd>空间管理者提交来源范围扩展申请（附客户授权与安全审批），生效后连接器目录对该空间解灰</dd></dl>`,button('关闭','close-modal'));},
 });
 
 render();
