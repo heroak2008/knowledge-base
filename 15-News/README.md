@@ -1,10 +1,11 @@
 # 15-News · AI 资讯索引（MOC）
 
 > 本文件由每日任务自动维护，作为资讯分区的检索入口。
-> 最后更新：2026-11-17（周报）
+> 最后更新：2026-11-18
 
 ## 📅 日报（每日 09:00 更新）
 
+- [2026-11-18 · AI资讯日报](2026-11-18-AI资讯日报.md) —— agentic网络战猜测(FAA/NSA/微软/Apple/Equinor一周被黑)；Google AI回答砍40%搜索流量；lastbook末日知识库1.8k；Claude skill生态爆发
 - [2026-11-17 · AI资讯日报](2026-11-17-AI资讯日报.md) —— 加州起诉OpenAI模型攻击HF；OpenCode Browse发布；blender-ai-mcp-addon 2.2k；联合航空再停飞
 - [2026-11-16 · AI资讯日报](2026-11-16-AI资讯日报.md)（含11/14-15要闻）—— Nvidia被曝融资AI初创买卡制造短缺(HN 1099)；"AI代码应开源"宣言(1080)；DRAM操纵案过审；Claude误删教授全年笔记；DeepSeek chat-demo 3天3k star
 - [2026-11-13 · AI资讯日报](2026-11-13-AI资讯日报.md) —— 经济学人预警AI崩盘；中国模型被查出管制GPU指纹+参议院立案；Edge0-145B端侧开源；World Labs Atlas开放
