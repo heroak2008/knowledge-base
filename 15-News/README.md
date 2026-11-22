@@ -1,10 +1,11 @@
 # 15-News · AI 资讯索引（MOC）
 
 > 本文件由每日任务自动维护，作为资讯分区的检索入口。
-> 最后更新：2026-11-21
+> 最后更新：2026-11-22
 
 ## 📅 日报（每日 09:00 更新）
 
+- [2026-11-22 · AI资讯日报](2026-11-22-AI资讯日报.md) —— 联合国自主武器管控谈判崩溃；GTA6重编译生态爆发(Leonida 2天5.6k)；rust-anything 7.4k；blender-ai-mcp 2.0k
 - [2026-11-21 · AI资讯日报](2026-11-21-AI资讯日报.md) —— **Anthropic IPO破发(AI股$4万亿蒸发)**；Inkling 2 Mini发布(HN 716)；Apple自研AI Agent；Google员工联名护学校；rust-anything 6.7k；blender-ai-mcp 1.8k
 - [2026-11-20 · AI资讯日报](2026-11-20-AI资讯日报.md) —— 法院拒AI生成"合理理由"；FBI因Claude聊天致电用户；rust-anything破5k；疑似刷星仓库google-ultra/VividFrame-GPU甄别
 - [2026-11-19 · AI资讯日报](2026-11-19-AI资讯日报.md) —— Gemini 4 Neon发布(HN 396)；美国学区因AI搜索弃用Google；rust-anything 1.3k→3.4k；tiny-voca 4.5M参数TTS
