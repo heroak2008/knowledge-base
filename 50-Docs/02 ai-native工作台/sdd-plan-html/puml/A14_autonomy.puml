@@ -1,0 +1,18 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+state "L1 人驱动\nAgent 辅助" as L1
+state "L2 决策收件箱\nAgent 推进到节点，人批准" as L2
+state "L3 白名单自动\n低风险自动通过 + 异常升级" as L3
+state "L4 大部分自动\n自动化范围 = 版本化标准" as L4
+[*] --> L1
+L1 --> L2 : 决策包上线
+L2 --> L3 : 同类决策通过率达标\n+ 上线观察
+L3 --> L4 : 标准覆盖面足够且无回退
+L3 --> L2 : 指标回退即降级
+L4 --> L3 : 标准变更 / 回退
+note right of L2
+  本方案的三个
+  人工决策点都从 L2 起步
+  随数据积累逐个收窄
+end note
+@enduml

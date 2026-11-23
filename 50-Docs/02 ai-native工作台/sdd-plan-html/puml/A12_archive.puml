@@ -1,0 +1,21 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+start
+:变更通过门禁与合规检查;
+:C11 读取能力注册表（稳定 ID）;
+:模型判定每个 delta 的归属能力;
+:脚本搬文件 / 合并进\nspecs/<capability>/spec.md;
+:dry-run 输出归档 diff;
+:validate：ID 存在 / 无冲突 / 引用完整;
+if (validate 通过?) then (是)
+  :人确认归档 diff\n（决策收件箱低风险项）;
+  if (满足 ADR 门槛?) then (是)
+    :写 ADR\n（hotfix 补录 ≤ 3 个工作日，逾期 CI 报警）;
+  else (否)
+  endif
+  stop
+else (否)
+  :打回重新归属\n（不允许人工直接改归档结果）;
+  stop
+endif
+@enduml

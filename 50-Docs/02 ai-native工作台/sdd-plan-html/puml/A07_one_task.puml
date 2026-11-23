@@ -1,0 +1,25 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+autonumber
+participant "协调者\n只读，不持有编辑工具" as C
+box "子代理（每次新鲜上下文）" #EEF3F9
+participant "子代理 #1" as S1
+participant "子代理 #2" as S2
+end box
+participant "状态文件\ntasks / progress / decisions" as F
+participant "C8 门禁" as G
+C -> F : 读取进度与既有决策
+C -> S1 : 任务 T3 + 上下文包\n（地图切片 / 契约 / 规则 / 范例）
+activate S1
+S1 -> G : 标记完成前本地跑门禁
+G --> S1 : 通过 / 失败
+S1 --> C : 只回传摘要\n做了什么 / 改了哪些文件 / 遗留
+deactivate S1
+C -> F : 勾选 T3，写进度
+C -> S2 : 任务 T4 + 新鲜上下文包
+S2 --> C : 摘要
+note over C
+  粒度上限：≤ 300 行 或 ≤ 5 文件
+  实现任务内禁止触发上下文压缩
+end note
+@enduml

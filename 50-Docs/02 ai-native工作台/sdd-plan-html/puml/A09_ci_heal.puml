@@ -1,0 +1,23 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+start
+:子代理实现过程中\n逐文件编译 / 类型检查（编译前置）;
+:C10 按 .sdd/verify.yaml 跑 CI\nbuild → test → lint → acceptance;
+if (通过?) then (是)
+  :进入合并确认;
+  stop
+else (否)
+  :失败日志 + 相关 diff\n交给自愈 agent（只拿这些输入）;
+  while (仍失败 且 轮次 < 3?) is (是)
+    :推修复提交;
+    :重跑失败步骤;
+  endwhile (否)
+  if (通过?) then (是)
+    :进入合并确认;
+    stop
+  else (否)
+    :转决策收件箱（人工介入点 3）;
+    stop
+  endif
+endif
+@enduml

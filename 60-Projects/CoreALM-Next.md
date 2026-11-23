@@ -15,6 +15,8 @@ status: active
 - [[../50-Docs/02 ai-native工作台/CoreALM-Next系统设计方案|系统设计方案]]（18模块与平台边界）
 - [[../50-Docs/02 ai-native工作台/CoreALM-Next功能模块划分|功能模块划分]]
 - [[../50-Docs/02 ai-native工作台/CoreALM-Next builtin接入建设任务清单|builtin接入建设任务清单]]
+- [[../50-Docs/02 ai-native工作台/SDD工具链系统化方案|SDD工具链系统化方案]]（2026-11-23 新增草案：三通道/六层/十三组件/三期路线，十条一线反馈的系统性解法；已确认 SDD 工具链为独立工具链，以斜杠命令（如 /spec-init）+ Skill 包 + MCP 服务（sdd-skills / sdd-mcp）发布、由 CodeAgent CLI 命令触发、无独立 SDD CLI，引导优先走 CoreALM-Next、本地单独跑保留；平台经 M5 资产登记、M17 镜像预装、M18 基线、M4 断点转决策包接入，不新增模块）
+  - 可视化版：[[../50-Docs/02 ai-native工作台/SDD工具链系统化方案.html|方案 A 系统化方案.html]]（12 图：7 张 PlantUML UML + 5 个 HTML 图示；开头有真实变更的终端走读和前后耗时对比）· [[../50-Docs/02 ai-native工作台/SDD工具链与CoreALM-Next结合方案.html|方案 B 与 CoreALM-Next 结合.html]]（9 图：5 张 PlantUML UML + 4 个 HTML 图示；定位边界/两种运行模式/事实归属/MCP 工具面·事件面·决策包契约/组件↔模块映射/对齐表/演进路线）
 
 ### 03 知识工程
 - [[../50-Docs/03 知识工程/AI原生研发作业知识工程实施方案|知识工程实施方案]]（来源/装配/消费/治理主合同）

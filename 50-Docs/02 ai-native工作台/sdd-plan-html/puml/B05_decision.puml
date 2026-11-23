@@ -1,0 +1,26 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+autonumber
+participant "sdd-mcp 服务" as M
+participant "CodeAgent 运行时" as A
+participant "M4 作业执行" as M4
+participant "M2 决策收件箱" as M2
+actor "决策人" as U
+participant "M6 质量管理" as M6
+M -> A : 工具返回 decision_required\n事项 / 证据 / 推荐与置信度 / 反方证据
+A -> M4 : AI 断点：保留现场，提交决策包
+M4 -> M2 : 生成人工待办
+U -> M2 : 批准 | 否决（理由必填）\n| 补充信息 | 亲自看
+alt 否决
+  M2 -> M6 : 记录理由（留痕）
+  M2 -> M4 : 回执：否决 + 原因
+  M4 -> A : 恢复现场，按原因调整（如升级通道）
+else 批准
+  M2 -> M4 : 回执：批准
+  M4 -> A : 恢复现场，继续（如 sdd_archive_apply）
+end
+note over M2
+  模型推荐，人做决定
+  反方证据必须呈现
+end note
+@enduml

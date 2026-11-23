@@ -1,0 +1,29 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+|M4 作业执行|
+start
+:提出验证请求（读 .sdd/verify.yaml）;
+switch (验证路径?)
+case (已有 CI/CD)
+  |M7 研发系统接入|
+  :调用流水线\n取结果 / 产物 / 回执;
+case (平台池化资源)
+  |M17 运行环境|
+  :从镜像仓选构建镜像、建环境\n（目标架构 / 工具链 / 执行节点）;
+  |M4 作业执行|
+  :在环境内运行\nbuild / test / lint / acceptance;
+endswitch
+|M4 作业执行|
+if (通过?) then (是)
+  :回传结果\n（构建成功 ≠ Task 完成）;
+  stop
+else (否)
+  if (未超轮次 且 无需业务判断?) then (是)
+    :返回 Agent 修正后再验证（限定轮次）;
+    stop
+  else (否)
+    :转人工;
+    stop
+  endif
+endif
+@enduml

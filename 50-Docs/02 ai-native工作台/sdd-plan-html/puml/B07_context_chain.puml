@@ -1,0 +1,25 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+autonumber
+participant "M4 作业执行" as M4
+participant "M7\nResolveKnowledgeSource" as M7
+participant "M5\nDiscoverKnowledge\n/ PlanTaskContext" as M5
+participant "sdd-mcp\nsdd_context(task)" as C
+participant "M18\nPrepareContextBaseline" as M18
+participant "M11 执行记录" as M11
+M4 -> M7 : 解析知识源\n代码仓 openspec/ · .sdd/ · docs/adr
+M7 --> M4 : 来源与权限
+M4 -> M5 : 发现候选资产\nspec / 契约 / ADR / 范例文件
+M5 -> C : 请求上下文包\n（地图切片 + Topic 卡 + 契约 + 规则）
+C --> M5 : ContextBundle\n（含实际装载清单）
+M5 -> M18 : 装配方案
+M18 --> M4 : ContextManifest 冻结
+M4 -> M4 : LoadTaskContext → 执行
+M4 -> M18 : ConfirmContextLoad
+M4 -> M11 : AppendKnowledgeObservation
+note over M18
+  ContextManifest 与 sdd_context 的
+  ContextBundle 一一对应，可审计
+  M18 同时记录 Skill 包与 MCP 版本
+end note
+@enduml

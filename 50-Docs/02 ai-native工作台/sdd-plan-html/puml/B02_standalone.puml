@@ -1,0 +1,30 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+autonumber
+actor "研发人员" as U
+participant "CodeAgent CLI\n（已加载 sdd-skills 与 sdd-mcp）" as A
+participant "sdd-mcp 服务\n（本地进程）" as M
+participant "代码仓 / CI" as G
+U -> A : /spec-init 订单服务增加幂等重试
+A -> M : sdd_triage(desc)
+M --> A : lane + reasons + confidence
+A -> M : sdd_spec_init / sdd_plan
+M -> G : 写 openspec/ 与 .sdd/ 工件
+A -> M : sdd_context(task)
+M --> A : ContextBundle（地图切片 + Topic + 契约）
+A -> A : 子代理实现（一任务一上下文）
+A -> M : sdd_gate(change)
+M -> G : 触发 CI（verify.yaml）
+G --> M : 通过 / 失败明细
+M --> A : gate.passed / gate.failed
+A -> M : sdd_archive(change, dry_run)
+M --> A : 归档计划 + validate 结果
+A -> U : 决策卡：合并确认
+U -> A : 批准
+A -> M : sdd_archive_apply
+note over M
+  sdd-mcp 把事件落盘为 JSONL
+  状态在仓库内（tasks / progress / decisions）
+  不需要平台
+end note
+@enduml

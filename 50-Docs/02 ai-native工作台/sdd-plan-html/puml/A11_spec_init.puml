@@ -1,0 +1,26 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+autonumber
+participant "C1 分级器" as C1
+participant "C3 Topic 索引\nimpact()" as C3
+participant "C2 增量 spec-init" as C2
+database "指纹缓存" as K
+participant "提案模板" as P
+C1 -> C3 : impact(since)
+C3 --> C1 : {capabilities, files, repos, contracts_touched}
+C1 -> C2 : spec_init(capabilities[])
+loop 每个波及能力
+  C2 -> K : 取能力指纹\n（文件集 hash + 依赖契约 hash）
+  alt 指纹未变
+    K --> C2 : 复用缓存 spec
+  else 指纹变化 或 无 spec
+    K --> C2 : 无
+    C2 -> C2 : 只对该能力起草 spec delta
+  end
+end
+C2 --> P : 覆盖报告\n已有 / 本次自动起草 / 不适用
+note over C2
+  全仓 wiki 不在变更路径上：
+  夜间异步刷新，带时间与 token 预算
+end note
+@enduml

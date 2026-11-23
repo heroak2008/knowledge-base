@@ -1,0 +1,25 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+autonumber
+participant "实现子代理" as I
+participant "C6 追溯矩阵\ncheck_trace" as T
+participant "C9 合规检查 agent\n独立上下文 · 只读凭据" as R
+participant "决策收件箱" as D
+I -> T : 提交 diff + trace.yaml
+T --> I : orphan_reqs / untested / unmapped_fields
+alt 存在断链
+  I -> I : 补测试或补字段映射
+end
+I -> R : diff + REQ 列表 + 三栏场景
+R -> R : 逐条对照\nPass / Fail / Partial + 证据（文件:行）
+R --> I : Fail 条目
+loop 回修 ≤ 3 轮
+  I -> R : 修复后再查
+  R --> I : 复核结果
+end
+R -> D : 仍有 Fail → 转人工裁决
+note over R
+  先 shadow 2–4 周统计漏报 / 误报
+  证据不足的条目降为提示项，再转阻断
+end note
+@enduml

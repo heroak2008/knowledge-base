@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SDD 工具链系统化方案（全套软件工程）</title>
+{{CSS}}
+</head>
+<body>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">方案 A · Spec Driven Development · 工具链规划 v1.0 草案</div>
+<h1>SDD 工具链系统化方案</h1>
+<p class="lead">这份方案把十条一线反馈整理成一份可以排期、可以验收的工具链规划，由三条通道、六层架构（十三个组件）、一套度量和三期路线组成。基本思路是：规范由模型生成，对错由编译器、linter、测试这类确定性工具判定，人只在门禁失败时介入。</p>
+<div class="meta">2026-11-23 · 配套文档 <a href="SDD工具链系统化方案.md">SDD工具链系统化方案.md</a> · 平台结合见 <a href="SDD工具链与CoreALM-Next结合方案.html">方案 B</a> · UML 图用 PlantUML（可展开源码），其余为 HTML 图示</div>
+</div></header>
+<nav class="toc"><div class="wrap">
+<a href="#s1">1 一页看懂</a><a href="#s2">2 问题诊断</a><a href="#s3">3 设计原则</a><a href="#s4">4 目标架构</a><a href="#s5">5 三条通道</a><a href="#s6">6 组件设计</a><a href="#s7">7 仓库工件</a><a href="#s8">8 度量体系</a><a href="#s9">9 路线图</a><a href="#s10">10 风险</a><a href="#s11">11 外部实践参考</a><a href="#s12">12 待确认</a>
+</div></nav>
+<main class="wrap">
+
+<section id="s1">
+<h2><span class="num">1</span>总览：从痛点到体验</h2>
+<p class="sub">先说结果。下面左边是一线反馈里的现状，右边是方案落地后的样子；再往下一张表，每一行把一个痛点对到具体特性和技术方案，以及用户能感觉到的变化。</p>
+<div class="ba">
+<div class="before"><b>现在</b><ul>
+<li>spec-init 跑一夜没完，全流程一整天；小改动只能 vibe coding，文档形同虚设</li>
+<li>设计文档里有的字段代码里漏了；时序图只画主流程，异常场景缺失；基于 SPEC 开发还是遗漏</li>
+<li>生成后编译错误反复跑；圈复杂度高、风格和项目不一样</li>
+<li>跨仓隐性规则说不清，agent 理不透仓间关系；codewiki 颗粒度粗，Topic 识别不到</li>
+<li>0.5K 代码生成得散，一压缩上下文就丢；归档目录迁错</li>
+<li>人写文档、人审文档、人盯编译</li>
+</ul></div>
+<div class="after"><b>之后</b><ul>
+<li>小改动 <b>30 分钟</b>走完、0–1 次确认；默认通道 <b>半天</b>；spec-init 从小时级降到分钟级；所有改动都走流程</li>
+<li>每条需求挂测试；合并前自动报"有需求没实现、有实现没需求"，<b>遗漏率 &lt; 2%</b></li>
+<li><b>合并前编译错误 = 0</b>，修复在 CI 里自动跑最多 3 轮；复杂度超标自动打回，风格锚定同模块范例</li>
+<li>改动方案直接列出<b>波及哪些仓、哪些契约、哪些能力</b>；定位命中率 ≥ 85%；踩过一次的规则变成 ADR / 契约测试</li>
+<li><b>压缩触发 = 0</b>，一任务一上下文，进度随时可看；归档先看 diff 再确认</li>
+<li>人只在<b>三个点</b>做确认（范围 / 合并 / 门禁失败）；文档由模型生成、可随手重生成</li>
+</ul></div>
+</div>
+<h3>1.1 痛点 → 特性 → 体验</h3>
+<table class="ov">
+<tr><th>一线痛点</th><th>特性</th><th>技术方案（组件）</th><th>体验变化</th></tr>
+<tr><td>spec-init 跑一夜没完；全流程一整天；小改动直接 vibe coding</td><td>按变更大小选通道</td><td>C1 变更分级器（确定性判据）→ 轻 / 标准 / 重；C2 增量 spec-init 只起草波及能力 + 指纹缓存</td><td>小改动 ≤ 30 分钟、0–1 次确认；默认通道 ≤ 半天；spec-init 分钟级；不再有"小改动绕过流程"</td></tr>
+<tr><td>设计文档有的字段代码里漏；时序图只覆盖主流程；基于 SPEC 开发遗漏多</td><td>需求挂测试，遗漏自动查出</td><td>C5 需求 ID + 三栏场景（主 / 备选 / 异常）+ 必答清单；C6 追溯矩阵，数据结构从 schema 生成；C9 独立合规检查 agent 拿 diff 逐条对照</td><td>合并前自动报"有需求没实现、有实现没需求"；遗漏率 &lt; 2%；异常场景天然变成测试</td></tr>
+<tr><td>跨仓隐性规则没承载；codewiki 颗粒度粗，Topic 识别不到</td><td>agent 能定位到符号和业务能力</td><td>C3 符号地图（tree-sitter + PageRank + 预算）+ Topic 索引（co-change 聚类 + spec/ADR 反推）；C4 契约仓 + 协调仓 + 规则层</td><td>方案直接列出波及的仓、契约、能力；定位命中率 ≥ 85%；隐性规则踩一次就固化</td></tr>
+<tr><td>生成后编译错误反复跑；希望流水线能自助修复</td><td>验证与自愈在 CI 里闭环</td><td>C10 verify.yaml 仓库自描述验证清单 + CI 自愈 agent（轮次上限 3）+ 逐文件编译前置</td><td>合并前编译错误 = 0；人不再盯编译；超轮次才转人</td></tr>
+<tr><td>圈复杂度高；风格与项目差异大</td><td>规范由确定性工具判定</td><td>C8 linter / 复杂度 / 格式化门禁，在编码过程中而不是提交后；风格锚点 = 同模块 2–3 个范例文件</td><td>超标自动打回；不用人写规范、人审风格</td></tr>
+<tr><td>0.5K 代码生成得散，一压缩上下文就丢</td><td>一任务一上下文，状态外置</td><td>C7 协调者不碰编辑工具；子代理一任务一新鲜上下文只回传摘要；tasks 勾选与 progress 落文件</td><td>压缩触发 = 0；进度随时可看；失败可续作</td></tr>
+<tr><td>归档目录迁错；文档治理负担重</td><td>归档先看 diff，文档可再生</td><td>C11 注册表 + 模型定归属 + 脚本搬 + dry-run 确认；C12 三层分离（描述层可抛弃 / 决策层 ADR / 约束层规则与测试）+ 漂移检测</td><td>归档修正次数 → 0；生成物可随手重生成，人的修正只落在规则 / ADR / 测试；文档数量不作考核</td></tr>
+</table>
+<div class="howto">
+<div><b>怎么用</b>研发人员在 CodeAgent CLI 里敲 <code>/spec-init &lt;变更描述&gt;</code>，后面按通道自动串起来，在三个决策点停下来等人（本地 CLI 或 CoreALM-Next 都行）。</div>
+<div><b>怎么交付</b>斜杠命令 + Skill 包（讲流程）+ MCP 服务（做判定），装进 CodeAgent 就能用；门禁在 CI 里跑，模型改不了。</div>
+<div><b>怎么推进</b>P0 两周先做不改引擎的改进 → P1 六周改引擎 → P2 八周补上下文与多仓 → P3 持续；看采用率和遗漏率，不看文档覆盖率。</div>
+</div>
+<h3>1.2 一个真实变更走一遍</h3>
+<p class="sub">拿"订单取消时库存释放失败要自动重试"这个变更当例子。研发人员在 CodeAgent CLI 里敲一条命令，之后只做两次确认，其余是看着它在终端里跑完。下面左边是标准通道（约 50 分钟），右边是轻通道（改一个错误码，约 20 分钟）。</p>
+<div class="walk two">
+<div class="term"><div class="ttl">研发人员的终端 · 标准通道 · 约 50 分钟</div><pre><span class="ln"><span class="t">09:02</span><span class="me">&gt; /spec-init 订单取消时库存释放失败要自动重试，最多 3 次</span></span>
+<span class="ln"><span class="t">09:03</span><span class="ok">[sdd-triage]</span> 标准通道。判据：单仓 ✓ · 预计改 6 个文件（轻通道上限 5）· 不触及契约 ✓ · 非核心路径 ✓</span>
+<span class="ln"><span class="t">09:03</span><span class="ok">[sdd-map]</span> 波及 order-service/cancel.py、inventory_client.py、retry_policy.py；Topic「订单履约 › 取消与回滚」</span>
+<span class="ln"><span class="t">09:04</span><span class="ok">[spec-init]</span> order-service 已有 spec ✓；inventory-client 缺 spec → 起草 delta：1 条需求 + 3 个场景（主流程 / 超时 / 重复回调）</span>
+<span class="ln"><span class="t">09:04</span><span class="human">[需要你确认]</span> 范围确认卡 #CHG-0142，推荐「标准通道」，置信度 0.86 → 看了 1 分钟，按 a 批准</span>
+<span class="ln"><span class="t">09:05</span><span class="ok">[implement]</span> 拆成 4 个任务，每个任务一个子代理：T1 重试策略 ✓ 6m · T2 调用改造 ✓ 4m · T3 幂等键 ✓ 3m · T4 测试 ✓ 5m</span>
+<span class="ln"><span class="t">09:24</span><span class="err">[gate]</span> 第 1 轮 ✗ OrderCancelService.retry() 圈复杂度 14 &gt; 10 → 自动修复：抽出 _backoff()，对照范例 RefundService</span>
+<span class="ln"><span class="t">09:31</span><span class="ok">[gate]</span> 第 2 轮 ✓ lint ✓ · test 12/12 ✓ · trace 3/3 ✓ · compliance 3/3 ✓ · 编译 ✓</span>
+<span class="ln"><span class="t">09:33</span><span class="human">[需要你确认]</span> 合并确认：归档 diff 3 个文件（见 1.3 右图）→ 看了 40 秒，按 a 合并</span>
+<span class="ln"><span class="t">09:35</span><span class="ok">[archive]</span> specs/order-service +2 条需求 · specs/inventory-client +1 条 · ADR-041 幂等键用订单号 · trace +3 条 · 事件 7 条已落盘</span>
+</pre></div>
+<div class="term"><div class="ttl">研发人员的终端 · 轻通道 · 约 20 分钟</div><pre><span class="ln"><span class="t">14:10</span><span class="me">&gt; /spec-init 取消接口的错误码 400 改成 409，文案同步</span></span>
+<span class="ln"><span class="t">14:11</span><span class="ok">[sdd-triage]</span> 轻通道。单仓 ✓ · 预计 2 个文件 ✓ · 不触及契约 ✓ · 非核心路径 ✓</span>
+<span class="ln"><span class="t">14:11</span><span class="ok">[proposal]</span> 一页提案：改动点 2 处、验收 3 条（接口返回 409 / 文案断言 / 原有 400 用例改成 409）；轻通道不要求范围确认</span>
+<span class="ln"><span class="t">14:12</span><span class="ok">[implement]</span> 1 个任务 ✓ 8m</span>
+<span class="ln"><span class="t">14:21</span><span class="ok">[gate]</span> 第 1 轮 ✓ 全部通过</span>
+<span class="ln"><span class="t">14:23</span><span class="ok">[merge]</span> 轻通道不归档，只补 1 行 trace。完。</span>
+<span class="ln"><span class="t">14:24</span><span class="human">人一共花了 2 分钟：敲命令 + 看一眼提案。</span></span>
+</pre></div>
+</div>
+<h3>1.3 开发者会收到的两张卡</h3>
+<p class="sub">整个流程里人真正要看的，除了 5.1 的范围确认卡，就是这两样：门禁报告（看哪里没过、机器打算怎么修）和归档 diff（看这次变更往仓库里留下了什么）。</p>
+<div class="walk two">
+<div class="term"><div class="ttl">门禁报告 · CHG-0142 · 第 1 轮 · CI 按 verify.yaml 执行，模型改不了结果</div><pre><span class="ln"><span class="err">✗ 复杂度</span>  OrderCancelService.retry()  圈复杂度 14（上限 10）</span>
+<span class="ln">           对照范例 RefundService.retry()（复杂度 5）：建议把退避计算抽成 _backoff()</span>
+<span class="ln">         <span class="human">→ 已自动修复，进入第 2 轮（上限 3 轮，超过转人）</span></span>
+<span class="ln"><span class="ok">✓ lint</span>      0 问题</span>
+<span class="ln"><span class="ok">✓ 测试</span>      12 / 12 通过，其中 3 条直接来自场景文件</span>
+<span class="ln"><span class="ok">✓ 追溯</span>      REQ 3 条 ↔ 代码 3 处，没有孤儿</span>
+<span class="ln"><span class="ok">✓ 合规</span>      diff 逐条对照 spec：3 / 3</span>
+<span class="ln">           CANCEL-04「重复回调幂等」由幂等键 = 订单号满足；「库存服务超时」落在 cancel.inventory-timeout 测试</span>
+</pre></div>
+<div class="term"><div class="ttl">合并确认 · CHG-0142 · 归档 diff（dry-run，人确认后才真的动文件）</div><pre><span class="ln">openspec/changes/CHG-0142/            → 删除（内容已合并进主 spec）</span>
+<span class="ln">specs/order-service/spec.md         <span class="ok">+ ADDED 2 条需求</span>（取消重试、幂等键）</span>
+<span class="ln">specs/inventory-client/spec.md      <span class="ok">+ ADDED 1 条需求</span>（本次起草，之前这个能力没有 spec）</span>
+<span class="ln">docs/adr/ADR-041-幂等键用订单号.md   <span class="ok">新增</span>（备选：请求 ID / 时间戳；没选的原因：重试时会变）</span>
+<span class="ln">.sdd/trace.yaml                     <span class="ok">+ 3 条</span></span>
+<span class="ln">事件                                 7 条 → .sdd/events/CHG-0142.jsonl</span>
+<span class="ln">                                     （triaged · approved · task.started ×4 · gate.failed · gate.passed · archive.validated）</span>
+<span class="ln">           <span class="human">[ a 合并 ]   [ e 看完整 diff ]   [ r 驳回（需填理由） ]</span></span>
+</pre></div>
+</div>
+<h3>1.4 同一个变更，前后各花多久</h3>
+<p class="sub">还是上面这个标准变更。右边两列是目标值，作为 P1 的验收口径，试点时逐项实测。</p>
+<table>
+<tr><th>步骤</th><th>现在：人做什么</th><th>之后：谁做</th><th>现在</th><th>之后</th><th>靠哪个组件</th></tr>
+<tr><td>理清范围和影响面</td><td>读代码、问老同事、猜波及</td><td>地图 + Topic 索引直接给波及文件和能力</td><td>60–90 分钟</td><td><b>3 分钟</b></td><td>C3 · C4</td></tr>
+<tr><td>写 spec / 设计文档</td><td>从模板开始手写</td><td>只对波及且缺 spec 的能力起草 delta，人改 0 字</td><td>2–3 小时</td><td><b>3–5 分钟</b></td><td>C2 · C5</td></tr>
+<tr><td>文档评审</td><td>约人开会，逐段过</td><td>看一张范围确认卡</td><td>约 1 小时</td><td><b>2 分钟</b></td><td>C1 · 决策收件箱</td></tr>
+<tr><td>实现</td><td>一个人顺着写，越写越散</td><td>拆 4 个任务，每个任务一个子代理</td><td>2–3 小时</td><td><b>20–30 分钟</b></td><td>C7</td></tr>
+<tr><td>编译错误来回修</td><td>跑编译、看报错、改、再跑</td><td>CI 里自愈，最多 3 轮</td><td>1–2 小时</td><td><b>0</b>（人不在场）</td><td>C10</td></tr>
+<tr><td>代码评审</td><td>逐行看风格和复杂度</td><td>linter 和复杂度门禁已判过，人只看合规报告</td><td>约 1 小时</td><td><b>10 分钟</b></td><td>C8 · C9</td></tr>
+<tr><td>归档</td><td>手工搬目录、改链接</td><td>看 diff，按 a</td><td>约 30 分钟</td><td><b>1 分钟</b></td><td>C11</td></tr>
+<tr><td><b>合计</b></td><td>一个人的一个工作日</td><td>人在场约 20 分钟，其余等机器</td><td><b>8–10 小时</b></td><td><b>50 分钟</b></td><td></td></tr>
+</table>
+<p class="sub" style="margin-top:18px">支撑这些的是三条通道、六层架构和十三个组件：通道决定一次变更走多重的流程（第 5 节），架构和组件负责把每一步交给机器或确定性工具（第 4、6 节）。</p>
+</section>
+
+<section id="s2">
+<h2><span class="num">2</span>问题诊断</h2>
+<p class="sub">十条反馈可以归为四类原因，每类对应一组组件。</p>
+<h3>2.1 现状基线</h3>
+<table>
+<tr><th>维度</th><th>现状</th><th>含义</th></tr>
+<tr><td>引擎</td><td>参考 OpenSpec，已尽量轻量</td><td>流程骨架可用，问题在执行层和验证层</td></tr>
+<tr><td>存量建模</td><td>缺乏；靠 codewiki（DeepWiki 类）逆向，颗粒度粗</td><td>瓶颈在上下文供给，而不在文档格式</td></tr>
+<tr><td>用户</td><td>传统产品转型；产业用户不愿治理文档</td><td>凡是要求人写或人审文档的做法都很难推行下去</td></tr>
+<tr><td>流水线</td><td>有 e2e demo，脚本写死、泛化低</td><td>验证能力已经有了，但脚本写死在流水线里，仓库自己不知道该怎么验证</td></tr>
+</table>
+<div class="viz"><h5>十条反馈 → 四类根因 → 组件</h5><div class="causes">
+<div class="cause a"><div class="hd"><i>A</i><b class="t">范围没收窄</b></div>
+<ol><li>spec-init 跑一晚没完，全流程一整天；小改动想直接 vibe coding</li></ol>
+<div class="lbl">解法方向</div><p class="fx">分级入口：判据决定通道；只对波及能力建 spec；开轻通道</p>
+<div class="lbl">组件</div><div class="chips"><span class="chip">C1 变更分级器</span><span class="chip">C2 增量 spec-init</span></div></div>
+<div class="cause b"><div class="hd"><i>B</i><b class="t">上下文不准</b></div>
+<ol><li>跨仓隐性规则无承载，AI 理不透仓间关系</li><li>codewiki 颗粒度粗，Topic 识别不到</li><li>时序图只覆盖主流程，异常 / 边界缺失</li></ol>
+<div class="lbl">解法方向</div><p class="fx">符号地图 + Topic 索引；契约仓 + 协调仓；场景文本化（主 / 备选 / 异常）</p>
+<div class="lbl">组件</div><div class="chips"><span class="chip">C3 符号地图 / Topic</span><span class="chip">C4 多仓工作区</span><span class="chip">C5 需求与场景模板</span></div></div>
+<div class="cause c"><div class="hd"><i>C</i><b class="t">规范 → 代码无追溯闭环</b></div>
+<ol><li>字段漏掉：复杂 / 容器 / 深层子字段未实现</li><li>基于 SPEC 开发功能遗漏多</li><li>不符合编码规范：圈复杂度高、风格差异大</li></ol>
+<div class="lbl">解法方向</div><p class="fx">需求 ID + trace + 每条需求挂测试；数据结构从 schema 生成不走散文；以 linter 判定；独立合规检查</p>
+<div class="lbl">组件</div><div class="chips"><span class="chip">C6 追溯矩阵</span><span class="chip">C8 确定性门禁</span><span class="chip">C9 合规检查 agent</span></div></div>
+<div class="cause d"><div class="hd"><i>D</i><b class="t">执行与验证未工程化</b></div>
+<ol><li>编译错误反复修；e2e 脚本写死、泛化低</li><li>上下文每压缩一次能力下降，最后不知道在干什么</li><li>归档目录迁移不准</li></ol>
+<div class="lbl">解法方向</div><p class="fx">一任务一上下文 + 状态外置；verify.yaml + CI 自愈 + 轮次上限；模型定归属、脚本搬文件</p>
+<div class="lbl">组件</div><div class="chips"><span class="chip">C7 执行编排</span><span class="chip">C10 验证清单与自愈</span><span class="chip">C11 归档与 ADR</span></div></div>
+</div><div class="cap">图 1 · 十条反馈、四类原因与对应组件。C12 漂移检测和 C13 度量看板横跨四类原因。每个组件都标明了判定方式：确定性规则、确定性工具、模型生成加校验，或独立模型加证据。</div></div>
+<div class="note"><b>诊断</b>：引擎已经把文档阶段自动化了，但<b>范围计算、上下文装配、追溯、验证</b>仍然靠模型自觉和人工兜底。模型自觉不可靠，人工兜底就变成了大量的人工干预。</div>
+
+</section>
+
+<section id="s3">
+<h2><span class="num">3</span>设计原则</h2>
+<p class="sub">七条原则，每条附落地含义，并对照今天的反面案例。</p>
+<table>
+<tr><th>#</th><th>原则</th><th>落地含义</th><th>反面案例（现状）</th></tr>
+<tr><td>P1</td><td>模型生成，确定性工具判定，人只在门禁失败时介入</td><td>由 linter、编译、测试判定；模型产物不靠人逐行审</td><td>人逐页审 spec markdown</td></tr>
+<tr><td>P2</td><td>范围优先：一切按"波及能力"做，不全仓</td><td>分析、spec 生成、上下文都只覆盖波及集合</td><td>spec-init 全仓扫描跑一夜</td></tr>
+<tr><td>P3</td><td>三层分离：描述层可抛弃、决策层 ADR、约束层契约/测试/steering</td><td>人工修正不落在生成物上</td><td>手改 wiki 后被重生成覆盖</td></tr>
+<tr><td>P4</td><td>可追溯：需求 ID → 场景 → 任务 → 测试 → 代码</td><td>每条需求至少挂一个测试</td><td>设计文档有、代码没有</td></tr>
+<tr><td>P5</td><td>一任务一上下文，状态外置</td><td>协调者不写代码；进度写文件不靠记忆</td><td>长会话压缩后迷失</td></tr>
+<tr><td>P6</td><td>仓库自描述</td><td>验证清单、契约、规则都在仓内，agent 不靠口头交代</td><td>脚本写死在流水线里</td></tr>
+<tr><td>P7</td><td>度量看采用率和遗漏率，不看文档覆盖率</td><td>文档数量不作为考核项</td><td>用文档数量考核</td></tr>
+</table>
+<div class="grid g3">
+<div class="card"><h4>能力（capability）</h4><p>一组可独立描述的业务能力，spec 的归档单位。</p></div>
+<div class="card"><h4>波及能力集合</h4><p>一次变更可能影响的 capability 集合，所有分析和生成的范围边界。</p></div>
+<div class="card"><h4>Topic</h4><p>按业务能力组织的代码区域索引，是"定位到符号"的入口。</p></div>
+<div class="card"><h4>通道</h4><p>一条端到端作业链路模板：轻 / 标准 / 重。</p></div>
+<div class="card"><h4>门禁</h4><p>确定性工具的通过 / 不通过判定，模型不能修改门禁。</p></div>
+<div class="card"><h4>决策收件箱</h4><p>所有人工介入点的统一形态：决策包 + 证据 + 推荐 + 反方证据。</p></div>
+</div>
+</section>
+
+<section id="s4">
+<h2><span class="num">4</span>目标架构</h2>
+<p class="sub">六层分工：入口层判断变更范围，上下文层准备给模型看的材料，规范层组织需求与场景，执行层管理实现过程，验证层负责判定，沉淀层决定哪些内容长期保留。</p>
+<div class="viz"><div class="rail">
+<div class="railbox"><b>研发人员</b><span>只在两处参与：L0 看一页提案，L5 做合并确认</span><span>小改动走轻通道，可以跳过范围确认</span><span>不写文档，只做确认或否决</span></div>
+<div class="stack">
+<div class="layer"><div class="nm">L0 入口层<small>判定范围</small></div><div><div class="ds">从一句话变更描述得到通道和判据；人只做确认</div><div class="chips"><span class="chip">C1 变更分级器</span></div></div></div>
+<div class="lnk">↓ 变更 + 通道</div>
+<div class="layer"><div class="nm">L1 上下文层<small>装配上下文</small></div><div><div class="ds">只对波及且缺 spec 的能力起草；地图 + Topic + 契约</div><div class="chips"><span class="chip">C2 增量 spec-init</span><span class="chip">C3 符号地图 / Topic</span><span class="chip">C4 多仓工作区</span></div></div></div>
+<div class="lnk">↓ 上下文包</div>
+<div class="layer"><div class="nm">L2 规范层<small>需求、场景与追溯</small></div><div><div class="ds">需求 ID + 三栏场景 + trace；数据结构从 schema 生成</div><div class="chips"><span class="chip">C5 需求与场景模板</span><span class="chip">C6 追溯矩阵 / schema-first</span></div></div></div>
+<div class="lnk">↓ 工件 + tasks</div>
+<div class="layer"><div class="nm">L3 执行层<small>实现过程</small></div><div><div class="ds">协调者只读；子代理一任务一新鲜上下文；状态外置到文件</div><div class="chips"><span class="chip">C7 执行编排</span></div></div></div>
+<div class="lnk">↓ diff</div>
+<div class="layer"><div class="nm">L4 验证层<small>确定性判定</small></div><div><div class="ds">确定性工具判定；合规 agent 拿 diff 对照 REQ；失败回修 ≤ 3 轮</div><div class="chips"><span class="chip">C8 确定性门禁</span><span class="chip">C9 合规检查 agent</span><span class="chip">C10 验证清单与 CI 自愈</span></div></div></div>
+<div class="lnk back">↑ 失败回 L3（≤ 3 轮，超限转人）　↓ 通过</div>
+<div class="layer"><div class="nm">L5 沉淀层<small>长期保留的内容</small></div><div><div class="ds">归档进主 spec、ADR、地图更新；人的修正只能落成约束</div><div class="chips"><span class="chip">C11 归档与 ADR</span><span class="chip">C12 漂移检测</span><span class="chip">C13 度量</span></div></div></div>
+<div class="lnk back">↺ 回到 L1：归档后的 spec、ADR、地图成为下一次变更的上下文</div>
+</div>
+<div class="railbox"><b>决策收件箱 + CI</b><span>三个人工决策点都通过决策收件箱：范围确认、合并确认、门禁失败裁决</span><span>CI 按 verify.yaml 执行</span><span>门禁凭据与 agent 凭据分离，防 reward hacking</span></div>
+</div><div class="cap">图 2 · 六层架构与数据流：L0 入口 → L1 取上下文 → L2 产工件 → L3 实现 → L4 判定（失败回 L3）→ L5 沉淀 → 回到 L1</div></div>
+<h3>4.1 组件总览</h3>
+<table>
+<tr><th>组件</th><th>解决</th><th>判定方式</th><th>阶段</th></tr>
+<tr><td>C1 变更分级器</td><td>#1</td><td>确定性规则</td><td><span class="tag a">P1</span></td></tr>
+<tr><td>C2 增量 spec-init</td><td>#1</td><td>模型生成 + 指纹缓存</td><td><span class="tag a">P1</span></td></tr>
+<tr><td>C3 符号地图与 Topic 索引</td><td>#4 #3 #1</td><td>确定性解析 + 模型归类 + 人校对名</td><td><span class="tag c">P2</span></td></tr>
+<tr><td>C4 多仓工作区</td><td>#3</td><td>契约文件 + 确定性兼容检查</td><td><span class="tag c">P2</span></td></tr>
+<tr><td>C5 需求与场景模板</td><td>#6 #2</td><td>模型起草 + 模板校验</td><td><span class="tag">P0</span></td></tr>
+<tr><td>C6 追溯矩阵与 schema-first</td><td>#2 #9</td><td>确定性校验</td><td><span class="tag a">P1</span></td></tr>
+<tr><td>C7 执行编排</td><td>#7</td><td>结构约束</td><td><span class="tag">P0</span></td></tr>
+<tr><td>C8 确定性质量门禁</td><td>#10</td><td>确定性工具</td><td><span class="tag">P0</span></td></tr>
+<tr><td>C9 合规检查 agent</td><td>#2 #9 #6</td><td>独立模型 + 证据</td><td><span class="tag a">P1 shadow</span> → <span class="tag c">P2 阻断</span></td></tr>
+<tr><td>C10 验证清单与 CI 自愈</td><td>#5</td><td>确定性 + 模型修复</td><td><span class="tag">P0 清单</span> → <span class="tag a">P1 自愈</span></td></tr>
+<tr><td>C11 归档与 ADR</td><td>#8</td><td>模型定归属 + 脚本执行 + 人确认</td><td><span class="tag">P0 dry-run</span> → <span class="tag a">P1</span></td></tr>
+<tr><td>C12 漂移检测与所有权</td><td>抛弃式文档矛盾</td><td>确定性扫描</td><td><span class="tag c">P2</span></td></tr>
+<tr><td>C13 度量看板</td><td>全部</td><td>采集与口径</td><td><span class="tag">P0 基线</span> → <span class="tag c">P2 看板</span></td></tr>
+</table>
+<h3>4.2 生命周期视角：覆盖全套软件工程</h3>
+<table>
+<tr><th>阶段</th><th>人</th><th>机器</th><th>组件</th></tr>
+<tr><td>需求 / 变更入口</td><td>一句话描述</td><td>分级、影响面、波及能力、spec 覆盖检查</td><td>C1 C2</td></tr>
+<tr><td>规范</td><td>确认范围（一页）</td><td>起草 spec delta、三栏场景、可执行验收</td><td>C2 C5</td></tr>
+<tr><td>设计</td><td>重通道评审契约</td><td>引用 schema / 契约、文本化时序图</td><td>C4 C5 C6</td></tr>
+<tr><td>实现</td><td>无</td><td>协调者 + 子代理切片实现、逐文件编译</td><td>C7 C3</td></tr>
+<tr><td>验证</td><td>失败时裁决</td><td>门禁、合规检查、CI、自愈</td><td>C8 C9 C10</td></tr>
+<tr><td>集成 / 发布</td><td>合并确认</td><td>归档合并、契约兼容检查</td><td>C11 C4</td></tr>
+<tr><td>维护 / 演进</td><td>低风险确认</td><td>spec-on-touch、漂移检测、重生成</td><td>C2 C12</td></tr>
+<tr><td>度量改进</td><td>看看板</td><td>采集、误报分析、判据调优</td><td>C13</td></tr>
+</table>
+<h3>4.3 交付形态：斜杠命令 + Skill 包 + MCP 服务</h3>
+<div class="note"><p>十三个组件不是一套独立的 SDD CLI。研发人员在 CodeAgent CLI 里敲一条斜杠命令（例如 <code>/spec-init 订单服务增加幂等重试</code>）触发，命令背后是<b>一组 Skill 加一组 MCP 服务</b>，装进任何支持自定义命令、Skill 和 MCP 的 CodeAgent 就能用。后续会引导大家优先从 CoreALM-Next 进入，本地用 CodeAgent CLI 单独跑作为试点入口和长期兜底。</p>
+<ul>
+<li><b>斜杠命令（入口层）</b>：每个 Skill 对应一条命令，放在 CodeAgent 的自定义命令目录（如 <code>.claude/commands/</code>、<code>.codex/prompts/</code>），正文指向该 Skill。<code>/spec-init &lt;变更描述&gt;</code> 是主入口，一条命令完成分级、提案、spec 起草并串起后续步骤；<code>/sdd-verify</code>、<code>/sdd-archive</code> 等可单独重跑某一步。</li>
+<li><b>Skill 包（sdd-skills，prompt 层）</b>：每个组件对应一个 <code>SKILL.md</code> 加参考资料和可选脚本，讲流程、模板、检查清单，告诉 agent 何时调用哪个工具。Skill 里不写判定逻辑。</li>
+<li><b>MCP 服务（sdd-mcp，确定性层）</b>：分级规则、指纹哈希、追溯解析、归档脚本、事件落盘都做成 MCP 工具（<code>sdd_triage</code>、<code>sdd_spec_init</code>、<code>sdd_context</code>、<code>sdd_check_trace</code>、<code>sdd_gate</code>、<code>sdd_archive</code> 等）。工具返回统一 <code>status</code>：ok / decision_required / gate_failed，decision_required 携带 §5.1 的决策包。</li>
+<li><b>门禁在 CI 执行</b>：<code>sdd_gate</code> 只触发 CI 按 verify.yaml 跑 build / test / lint，<code>sdd_gate_result</code> 读回结果。判定不放在模型能改写的地方。</li>
+<li><b>工件与事件</b>：spec、trace、ADR 等工件在仓库内；事件由 sdd-mcp 落盘为 JSONL，给度量（C13）和平台（方案 B）消费。</li>
+</ul>
+<p>与 CoreALM-Next 的接入方式见 <a href="SDD工具链与CoreALM-Next结合方案.html">方案 B</a>：平台通过 M5 资产登记、M17 镜像预装、M18 基线冻结、M4 断点转决策包接入，不新增模块。</p></div>
+</section>
+
+<section id="s5">
+<h2><span class="num">5</span>工作流：三条通道</h2>
+<p class="sub">分级结果可以被人覆盖，但必须选择原因，覆盖记录用来调整判据。轻通道不是绕过 SDD：它把流程压缩到一页提案加可执行验收，目的是让小改动也愿意走 SDD，而不是直接 vibe coding。</p>
+<table>
+<tr><th></th><th>轻通道</th><th>标准通道</th><th>重通道</th></tr>
+<tr><td>触发<span class="tag gray">阈值待确认</span></td><td>单仓、影响文件 ≤ 5、不触及契约和核心模块路径</td><td>默认</td><td>跨仓、改契约、核心模块、新能力</td></tr>
+<tr><td>工件</td><td>一页 proposal（含 3–5 条可执行验收）</td><td>proposal + spec delta（需求 ID + 三栏场景）+ 设计（引用 schema）+ tasks</td><td>标准工件 + 契约变更稿 + 保真度测试计划 + ADR 草案</td></tr>
+<tr><td>人工介入点</td><td>0–1（合并确认）</td><td>2（范围确认、合并确认）</td><td>≥ 3（范围评审、契约评审、合并评审）</td></tr>
+<tr><td>门禁</td><td>编译 + lint + 验收测试</td><td>+ 合规检查 + 回归</td><td>+ 跨仓兼容检查 + 保真度测试</td></tr>
+<tr><td>时长目标</td><td>≤ 30 分钟</td><td>≤ 半天</td><td>按周计</td></tr>
+<tr><td>归档</td><td>无（提交信息即记录）</td><td>archive 合并；视情况 ADR</td><td>archive + ADR 必写</td></tr>
+</table>
+<figure class="diag">{{IMG:A05_lanes|三条通道泳道}}<figcaption>图 3 · 三条通道泳道。研发人员只给一句描述，工具链按分级进入轻、标准或重通道；两个人工决策点（范围确认、合并确认）都通过决策收件箱；门禁失败先自动回修，超过轮次上限才转人。</figcaption></figure>
+<div class="two">
+<div>
+<h3>5.1 人工确认的形态：一页决策卡</h3>
+<p>范围确认时，人看到的是一张决策卡，而不是逐页的 markdown。卡片列出变更是什么、走哪条通道、判据明细、波及哪些能力、spec 覆盖情况和可执行验收标准；下面是模型推荐与置信度、<b>必须呈现的反方证据</b>，以及四个操作（批准、否决且理由必填、补充信息、亲自看）。做推荐的是模型，做决定的是人；否决和复核都留痕。</p>
+<p>这与 CoreALM-Next 的决策收件箱是同一种形态。SDD 工具链的三个人工点都复用它，不另建审批流。</p>
+</div>
+<figure class="diag"><div class="inbox">
+<div class="top"><div class="ttl">范围确认 · #CHG-0142 订单服务幂等重试</div><div class="conf">AI 推荐置信度 0.86 · 待你决定</div></div>
+<dl>
+<dt>变更</dt><dd>支付回调超时后重试导致重复扣款；增加幂等键与重试窗口</dd>
+<dt>通道</dt><dd><span class="chip b">标准通道</span>　判据命中 3 条：单仓 · 4 个文件 · 不触及契约</dd>
+<dt>波及能力</dt><dd>order-service × 3 文件 · pay-callback × 1 文件</dd>
+<dt>spec 覆盖</dt><dd>order-service 已有；pay-callback 缺 → 已自动起草 delta（待你扫一眼）</dd>
+<dt>验收标准</dt><dd>1. 同一幂等键重复回调只扣款一次　2. 重试窗口内失败回调 5 分钟后重投　3. 回调乱序不改变终态</dd>
+</dl>
+<div class="rec yes"><b>AI 推荐：批准，走标准通道</b>先补 pay-callback 的 spec delta，再进入实现。</div>
+<div class="rec no"><b>反方证据（必须呈现）</b>触及支付回调核心路径，文件数接近"重通道"阈值（5 文件）；若需改回调契约，应升级为重通道并写 ADR。</div>
+<div class="acts"><span class="btn pri">批准</span><span class="btn warn">否决 · 理由必填</span><span class="btn">补充信息</span><span class="btn">亲自看</span></div>
+<div class="foot">模型推荐，人做决定 · 否决与复核留痕（M6）· 轻通道可跳过此卡</div>
+</div><figcaption>图 4 · 决策收件箱里的范围确认卡（示意）：人看的是一张卡，而不是逐页 markdown</figcaption></figure>
+</div>
+<figure class="diag">{{IMG:A14_autonomy|自动化分级}}<figcaption>图 5 · 自动化分级 L1 到 L4：随着低风险项进入白名单，需要人决定的决策点逐渐减少；指标回退时自动降级。</figcaption></figure>
+</section>
+
+<section id="s6">
+<h2><span class="num">6</span>组件详细设计</h2>
+<p class="sub">每个组件给出：解决哪条反馈、谁来判定、在哪个阶段交付、设计要点、接口与验收。标签颜色对应四类根因：<span class="tag a">A 范围</span> <span class="tag b">B 上下文</span> <span class="tag c">C 追溯</span> <span class="tag d">D 执行验证</span>。</p>
+
+<h3>L0 入口层 · 范围优先</h3>
+<div class="grid g2">
+<div class="card comp"><h4>C1 变更分级器 <code>triage</code></h4><div class="kv"><span class="tag a">A 范围</span> 解决 #1 · 判定：确定性规则（模型只做"描述→影响面"初筛）· <span class="tag a">P1</span></div>
+<ul>
+<li>判据版本化放 <code>.sdd/triage.yaml</code>，可继承平台默认。初值：文件数、仓数、是否触及 <code>contracts/</code> 或核心路径标记、是否有 schema 变更、需求条数。</li>
+<li>影响面由 C3 的 impact 查询给出（topic → 能力 → 文件集），不由模型猜测。</li>
+<li>输出"通道 + 判据明细 + 置信度"，进决策收件箱作为低风险确认项；人改通道必须选原因。</li>
+</ul>
+<p class="iface">接口 <code>triage(change_description, impact) → {lane, reasons, overrides[]}</code><br>验收：与资深工程师判断一致率 ≥ 90%；轻通道端到端 P50 ≤ 30 分钟；小修改走 SDD 的比例较基线提升。</p></div>
+<div class="card comp"><h4>C2 增量 spec-init <code>spec_init</code></h4><div class="kv"><span class="tag a">A 范围</span> 解决 #1 · 判定：模型生成 + 确定性指纹缓存 · <span class="tag a">P1</span></div>
+<ul>
+<li>波及能力集合 = C3 impact 结果 ∩ spec 覆盖缺口；已有且指纹未变的不重算。</li>
+<li>能力级指纹 = 能力文件集 hash + 依赖契约 hash；指纹未变直接复用缓存。</li>
+<li>全仓 wiki 不在变更路径上：夜间异步刷新，带时间和 token 预算，超限降级为"索引 + 按需生成"。</li>
+<li>提案模板新增必填字段"波及模块 spec 覆盖"：哪些能力有 spec、哪些本次自动起草、哪些明确不适用。</li>
+</ul>
+<p class="iface">接口 <code>spec_init(capabilities[]) → {drafts[], coverage_report}</code><br>验收：标准通道 spec-init P50 ≤ 10 分钟；指纹未变重跑 &lt; 1 分钟；单次变更分析 token 有上限并被记录。</p></div>
+</div>
+<figure class="diag">{{IMG:A11_spec_init|增量 spec-init}}<figcaption>图 6 · 增量 spec-init：C1 分级 → C3 影响面 → C2 只对"波及且缺 spec"的能力起草，指纹命中的直接复用，产出提案覆盖报告。</figcaption></figure>
+
+<h3>L1 上下文供给层 · 定位到符号</h3>
+<div class="grid g2">
+<div class="card comp"><h4>C3 符号地图与 Topic 索引 <code>get_context / impact</code></h4><div class="kv"><span class="tag b">B 上下文</span> 解决 #4 #3（并为 C1/C2 提供影响面）· 判定：确定性解析 + 模型归类 + 人只校对名称 · <span class="tag c">P2</span></div>
+<ul>
+<li><b>符号地图</b>：tree-sitter 解析 → 符号与调用/引用边 → PageRank 排序 → 按 token 预算输出；按语言做适配器，先覆盖主语言；基于 git diff 增量更新。</li>
+<li><b>Topic 索引</b>：按业务能力组织。每个 Topic = 稳定 ID + 名称 + 一句话 + 入口符号 + 关联 spec/ADR/契约 + 关联仓。来源三路融合：codewiki 目录级结果（粗）、co-change 聚类（git 共变历史）、从 spec/ADR/需求反推。</li>
+<li><b>上下文接口</b> <code>get_context(task)</code>：地图切片 + Topic 卡 + 相关契约 + 适用规则 + 同模块 2–3 个范例文件；按预算裁剪；实际装载记入 ContextManifest。</li>
+<li>人只校对 Topic 名和归属（低风险项），不写索引。</li>
+</ul>
+<p class="iface">接口 <code>get_context(task) → ContextBundle</code>；<code>impact(since) → {capabilities, files, repos, contracts_touched}</code><br>验收：固定问答集 top-5 命中率 ≥ 85%；上下文不超预算；Topic 人工修改率逐月下降。</p></div>
+<div class="card comp"><h4>C4 多仓工作区 <code>assemble_workspace</code></h4><div class="kv"><span class="tag b">B 上下文</span> 解决 #3 · 判定：契约文件 + 确定性兼容检查 · <span class="tag c">P2</span></div>
+<ul>
+<li><b>契约层</b>：共享契约仓（OpenAPI / proto / JSON Schema <span class="tag gray">格式待确认</span>），接口兼容性检查进 CI；契约变更强制走重通道。</li>
+<li><b>工作区层</b>：协调仓存依赖图（谁提供接口、谁消费）、owner、发布顺序、兼容窗口；组装器按波及仓拼装工作区。</li>
+<li><b>规则层</b>：AGENTS.md 基线段由协调仓生成，仓级/路径级手写段覆盖，优先级明确。</li>
+<li><b>隐性规则的沉淀</b>：每次出现 AI 理不清仓间关系的情况，当场记成 ADR 或契约测试，不能只做口头解释。</li>
+</ul>
+<p class="iface">接口 <code>assemble_workspace(capabilities) → Workspace{repos[], contracts[], rules[]}</code><br>验收：跨仓变更一次门禁通过率提升；隐性规则事件数环比下降；规则冲突数为 0。</p></div>
+</div>
+
+<h3>L2 规范层 · 需求、场景与追溯</h3>
+<div class="grid g2">
+<div class="card comp"><h4>C5 需求与场景模板 <code>validate_spec</code></h4><div class="kv"><span class="tag c">C 追溯</span> 解决 #6 #2 · 判定：模型起草 + 模板校验（缺项标红）· <span class="tag">P0</span></div>
+<ul>
+<li>需求带 ID（<code>REQ-&lt;能力&gt;-&lt;序号&gt;</code>），EARS 句式书写。</li>
+<li>场景三栏：主流程 / 备选流程 / 异常流程。必答清单：空输入、超时、幂等、并发、权限、边界值；不适用必须写原因。</li>
+<li>时序图文本化，参与者只能是契约中的接口；每张主序列图至少配一张异常序列图。</li>
+<li>每条异常场景落成测试用例（由 C9 核对）。</li>
+</ul>
+<p class="iface">验收：需求带 ID 比例 100%；三栏完整率 ≥ 95%；异常场景对应测试存在率 ≥ 90%。</p></div>
+<div class="card comp"><h4>C6 追溯矩阵与 schema-first <code>check_trace</code></h4><div class="kv"><span class="tag c">C 追溯</span> 解决 #2 #9 · 判定：确定性校验 · <span class="tag a">P1</span></div>
+<ul>
+<li><code>trace</code>：requirement_id → scenario → task → test → code path；tasks 每条任务回链 REQ ID。</li>
+<li>数据结构只引用 schema，类型代码由生成器产出，不在散文里描述字段。</li>
+<li>门禁：每条 REQ 至少一个测试；每个 schema 字段在代码中有生成映射。</li>
+</ul>
+<p class="iface">接口 <code>check_trace(trace) → {orphan_reqs[], untested[], unmapped_fields[]}</code><br>验收：字段遗漏（#2）归零；合规检查发现的功能遗漏 / 需求 &lt; 2%。</p></div>
+</div>
+
+<h3>L3 执行层 · 一任务一上下文</h3>
+<div class="card comp"><h4>C7 执行编排 <span class="tag">P0</span></h4><div class="kv"><span class="tag d">D 执行验证</span> 解决 #7 · 判定：结构约束</div>
+<ul>
+<li>协调者只读不写（不持有编辑工具）；子代理一任务一新鲜上下文，只回传摘要（做了什么、改了哪些文件、遗留）。</li>
+<li>状态外置：tasks 勾选、<code>progress.md</code>、<code>decisions.md</code>；每次尝试一份续作记录。</li>
+<li>任务粒度上限 <span class="tag gray">初值 ≤ 300 行或 ≤ 5 文件</span>，超限拆分；实现任务内禁止触发上下文压缩，超限即拆。</li>
+<li>探索（读代码、找位置）交子代理，不占实现会话。</li>
+</ul>
+<p class="iface">验收：实现任务压缩触发次数 = 0；长任务一次完成率提升；重复编辑 / 回退次数下降。</p></div>
+<figure class="diag">{{IMG:A07_one_task|一任务一上下文}}<figcaption>图 7 · 一任务一上下文：协调者只读、不持编辑工具；每个子代理拿新鲜上下文和一个切片；进度写进状态文件；C8 门禁在子代理标记完成前本地跑。</figcaption></figure>
+
+<h3>L4 验证层 · 确定性判定</h3>
+<div class="grid g2">
+<div class="card comp"><h4>C8 确定性质量门禁 <span class="tag">P0</span></h4><div class="kv"><span class="tag c">C 追溯</span> 解决 #10 · 判定：确定性工具</div>
+<ul>
+<li>项目：圈 / 认知复杂度、函数与文件长度、格式化、lint、命名、import、安全扫描；阈值版本化。</li>
+<li>时机：<b>进行中</b>——子代理标记任务完成前必须本地跑门禁；CI 再跑一次。</li>
+<li>风格锚点：同模块 2–3 个范例文件注入上下文，让模型模仿而不是靠规则解释。</li>
+<li>steering / constitution 只负责解释"为什么"，判定交给 linter。</li>
+</ul>
+<p class="iface">验收：一次门禁通过率；复杂度超标数；与项目风格的 diff 量下降。</p></div>
+<div class="card comp"><h4>C9 合规检查 agent <span class="tag a">P1 shadow</span> → <span class="tag c">P2 阻断</span></h4><div class="kv"><span class="tag c">C 追溯</span> 解决 #2 #9 #6 · 判定：独立模型 + 证据</div>
+<ul>
+<li>独立上下文（不是写代码的会话）、只读凭据。输入：diff + REQ 列表 + 场景 + trace。输出：逐条 Pass / Fail / Partial + 证据（文件:行）。</li>
+<li>Fail 回执行层修复，循环上限 3 轮，超限转决策收件箱。</li>
+<li>先 shadow（只报告不阻断）跑 2–4 周，统计漏报 / 误报，再转阻断；证据不足的条目降为提示项。</li>
+</ul>
+<p class="iface">验收：漏报率（人工复核对照）；误报率；每变更检查时长。</p></div>
+</div>
+<figure class="diag">{{IMG:A08_trace|追溯与合规检查}}<figcaption>图 8 · C6 追溯校验 + C9 合规检查：确定性检查先跑，合规 agent 拿 diff 逐条对照 REQ；Fail 回修 ≤ 3 轮，超限转决策收件箱，Pass 才进入合并确认。</figcaption></figure>
+<div class="card comp"><h4>C10 验证清单与 CI 自愈 <span class="tag">P0 清单</span> → <span class="tag a">P1 自愈</span></h4><div class="kv"><span class="tag d">D 执行验证</span> 解决 #5 · 判定：确定性验证 + 模型修复</div>
+<ul>
+<li><code>.sdd/verify.yaml</code>：build / test / lint / acceptance 命令、镜像、工具链、依赖服务、超时、目标架构；平台默认 + 产品专用覆盖。</li>
+<li>编译前置：实现过程中逐文件编译 / 类型检查，错误当场修。</li>
+<li>CI 失败 → 自愈 agent（只拿失败日志 + 相关 diff）→ 推修复提交 → 上限轮次 → 转人工。</li>
+<li>现有 e2e demo 脚本改为读 verify.yaml，不再写死。</li>
+<li><b>凭据分离</b>：门禁脚本和测试期望放在 agent 写不到的路径；测试期望先在参考实现上验证。</li>
+</ul>
+<p class="iface">验收：合并前编译错误 = 0；自愈成功率；人工介入次数 / 变更下降。</p></div>
+<figure class="diag">{{IMG:A09_ci_heal|验证与自愈}}<figcaption>图 9 · 验证闭环：逐文件编译前置 → CI 按 verify.yaml 执行 → 失败交给自愈 agent（轮次 &lt; 3）→ 通过则合并确认，超限转人工。</figcaption></figure>
+
+<h3>L5 沉淀层 · 归档、ADR 与漂移检测</h3>
+<div class="grid g2">
+<div class="card comp"><h4>C11 归档与 ADR <span class="tag">P0 dry-run</span> → <span class="tag a">P1</span></h4><div class="kv"><span class="tag d">D 执行验证</span> 解决 #8 + 决策沉淀 · 判定：模型定归属 + 脚本执行 + 人确认</div>
+<ul>
+<li>能力注册表（稳定 ID）→ 模型判定 delta 归属 → 脚本搬文件 / 合并 → dry-run 输出 diff → validate（ID 存在、无冲突、引用完整）→ 人确认。</li>
+<li>ADR 门槛：持久约束 / 契约 / 边界 + 有实质权衡的备选 + 后续必须遵守。hotfix 补录时限 <span class="tag gray">初值 3 个工作日</span>，逾期 CI 报警。</li>
+<li>归档 diff 作为决策收件箱低风险确认项。</li>
+</ul>
+<p class="iface">验收：归档 validate 通过率 100%；人工修正归档次数 → 0；补录逾期数下降。</p></div>
+<div class="card comp"><h4>C12 漂移检测与所有权 <span class="tag c">P2</span></h4><div class="kv">解决"抛弃式文档"与 Doc as Code 的矛盾 · 判定：确定性扫描</div>
+<ul>
+<li>三层：描述层（生成、带所有权标记、禁止手改、可抛弃）/ 决策层（ADR）/ 约束层（归档后的 spec delta + 测试 + 契约 + steering）。</li>
+<li><b>规则</b>：对生成物的人工修正不直接改生成物，而是写成 steering 规则、ADR 或测试，重生成时作为输入。</li>
+<li>漂移检查：提交前扫描 staged diff 标记过时文档；三档 lite（提示）/ standard（阻断可豁免）/ strict（阻断）。</li>
+</ul>
+<p class="iface">验收：生成物手改次数 = 0；漂移告警有效率；重生成后人工修正保留率 100%。</p></div>
+</div>
+<figure class="diag">{{IMG:A12_archive|归档流程}}<figcaption>图 10 · 归档：模型只判定"归属哪个能力"，搬文件交给脚本；dry-run diff + validate 后才进入人工确认；达到门槛的决策必须落 ADR。</figcaption></figure>
+<div class="viz"><div class="tri">
+<div class="col desc"><h6>描述层 · 可抛弃</h6><p>机器生成，禁止手改；定期重生成即可。</p><div class="chips"><span class="chip g">codewiki / DeepWiki 页面</span><span class="chip g">docs/generated</span><span class="chip g">spec 草稿（归档前）</span></div><div class="who">谁维护：agent。过时了就重生成，不治理。</div></div>
+<div class="col dec"><h6>决策层 · 持久</h6><p>ADR：有实质权衡的决策；门槛设高，hotfix 补录有时限。</p><div class="chips"><span class="chip a">docs/adr/NNNN-*.md</span><span class="chip a">契约变更稿</span></div><div class="who">谁维护：人写（或 agent 起草、人确认）。</div></div>
+<div class="col con"><h6>约束层 · 持久且可执行</h6><p>归档后的 spec、测试与契约、steering 规则；是重生成的输入。</p><div class="chips"><span class="chip">openspec/specs</span><span class="chip">契约测试 / @test</span><span class="chip">AGENTS.md / steering</span></div><div class="who">谁维护：随 change 归档；CI 守护。</div></div>
+</div>
+<div class="fed"><span class="loop">↻</span><span>人发现生成文档有误 → <b>不改生成物</b>，把修正落到约束层（steering 规则 / ADR / 测试）→ 重生成以此为输入 → <b>C12 漂移检测</b>在提交前标记过时文档，三档 lite / standard / strict。</span></div>
+<div class="cap">图 11 · 三层分离：描述层可抛弃，决策层与约束层持久；人的修正只能进入约束层</div></div>
+<div class="card comp"><h4>C13 度量看板 <span class="tag">P0 基线</span> → <span class="tag c">P2 看板</span></h4><div class="kv">解决全部 · 判定：采集与口径</div>
+<ul><li>指标见第 8 节；口径版本化，统一由运营分析侧管理。</li><li>P0 只做基线采集，P2 再上看板；不考核文档覆盖率。</li></ul></div>
+</section>
+
+<section id="s7">
+<h2><span class="num">7</span>仓库内工件规范</h2>
+<p class="sub">对应原则 P6"仓库自描述"：验证清单、分级判据、门禁阈值和追溯矩阵都放在仓库里，agent 不需要靠口头交代。</p>
+<div class="two">
+<div>
+<h3>7.1 目录布局</h3>
+<pre>&lt;repo&gt;/
+├── AGENTS.md                 # 规则：协调仓生成的基线段（带所有权标记）+ 仓级手写段
+├── openspec/
+│   ├── changes/&lt;change-id&gt;/  # proposal / design / specs/&lt;capability&gt;/spec.md（delta）/ tasks
+│   └── specs/&lt;capability&gt;/   # 归档后的主 spec（约束层）
+├── contracts/                # 本仓对外契约，或指向契约仓的 pin
+├── docs/
+│   ├── adr/NNNN-*.md         # 决策层
+│   ├── scenarios/*.md        # 三栏场景 + 文本化序列图
+│   └── generated/            # 描述层：所有权标记，禁止手改，可重生成
+└── .sdd/
+    ├── verify.yaml           # 验证清单
+    ├── triage.yaml           # 分级判据（可继承平台默认）
+    ├── standards.yaml        # 门禁阈值（引用版本化质量标准）
+    ├── trace.yaml            # 追溯矩阵（随 change 维护，归档时合并）
+    └── map/                  # 符号地图缓存（可重建，不审）</pre>
+</div>
+<div>
+<h3>7.2 验证清单 <code>.sdd/verify.yaml</code></h3>
+<pre># 按产品填写；平台提供默认，产品专用配置需审核
+version: 1
+image: &lt;构建镜像引用&gt;            # 锁定路径、镜像、工具链、目标架构
+toolchain: { compiler: &lt;编译器及版本&gt;, target: &lt;目标架构&gt; }
+commands:
+  compile-file: "&lt;逐文件编译/类型检查命令 {file}&gt;"   # 编译前置
+  build: "&lt;全量构建&gt;"
+  test: "&lt;单元/集成测试&gt;"
+  lint: "&lt;静态检查，含复杂度阈值来自 standards.yaml&gt;"
+  acceptance: "&lt;按场景跑可执行验收 {scenario}&gt;"
+services: []                   # 依赖服务及桩
+timeouts: { build: 20m, test: 15m }
+retry: { self_heal_max: 3 }    # 自愈上限，超过转人工</pre>
+</div>
+</div>
+<div class="two">
+<div>
+<h3>7.3 需求与三栏场景 <code>openspec/specs/&lt;capability&gt;/spec.md</code></h3>
+<div class="req">
+<div class="hd"><span class="tag">REQ</span><code>REQ-OrderSvc-012</code><b>取消订单释放库存</b><span class="tag ok">已挂测试</span><span class="tag gray">需求 ID · 能力 OrderSvc · 序号 012</span></div>
+<p class="stmt"><b>WHEN</b> 订单处于"已支付未发货"状态，<br><b>系统 SHALL</b> 在 3 秒内释放占用库存并返回取消结果。</p>
+<div class="cols3">
+<div class="sc main"><h6>主流程</h6><ol><li>订单已支付</li><li>调用库存服务释放</li><li>标记已取消</li><li>返回成功</li></ol></div>
+<div class="sc alt"><h6>备选流程</h6><ol><li>已发货订单</li><li>拒绝取消</li><li>返回冲突</li></ol></div>
+<div class="sc err"><h6>异常流程</h6><ol><li>库存服务超时（&gt; 2s）</li><li>进入待补偿队列</li><li>返回"处理中"，重试幂等键 = 订单号</li></ol></div>
+</div>
+<div class="chk"><span>必答清单</span><ul>
+<li>空输入 <b>→</b> 契约 schema 校验（schema-first）</li>
+<li>超时 <b>→</b> 异常流程</li>
+<li>幂等 <b>→</b> 重试幂等键 = 订单号</li>
+<li>并发 <b>→</b> WHEN 条件限定状态，状态机互斥</li>
+<li class="na">权限：不适用——服务间调用，鉴权在网关</li></ul></div>
+<div class="links">测试：<code>&lt;测试文件路径&gt;</code>　·　任务：T3、T4　·　每条需求必须有场景、任务、测试三样回链，缺一即被 C6 阻断</div>
+</div>
+<details class="src plain"><summary>原始工件（spec.md 片段，agent 读写的就是这段）</summary><pre>## REQ-OrderSvc-012 取消订单释放库存
+WHEN 订单处于"已支付未发货"状态，
+系统 SHALL 在 3 秒内释放占用库存并返回取消结果。
+
+| 主流程 | 备选流程 | 异常流程 |
+|---|---|---|
+| 已支付 → 调用库存服务释放
+→ 标记已取消 → 返回成功 | 已发货订单 → 拒绝取消
+→ 返回冲突 | 库存服务超时(&gt;2s) → 进入待补偿队列
+→ 返回"处理中"，重试幂等键 = 订单号 |
+
+- 必答清单：空输入 / 超时 / 幂等 / 并发 / 权限
+  （不适用必须写原因）
+- 测试：&lt;测试文件路径&gt;　任务：T3、T4</pre></details>
+</div>
+<div>
+<h3>7.4 追溯矩阵 <code>.sdd/trace.yaml</code></h3>
+<div class="trace">
+<div class="st"><h6>需求 REQ</h6><code>REQ-OrderSvc-012</code><ul><li>取消订单释放库存</li></ul></div>
+<div class="st"><h6>场景 scenarios</h6><ul><li><code>cancel.paid</code></li><li><code>cancel.shipped</code></li><li><code>cancel.inventory-timeout</code></li></ul></div>
+<div class="st"><h6>任务 tasks</h6><ul><li>T3</li><li>T4</li></ul></div>
+<div class="st"><h6>测试 tests</h6><ul><li><code>&lt;测试文件路径&gt;</code></li></ul></div>
+<div class="st"><h6>代码 code</h6><ul><li><code>&lt;实现文件&gt;</code></li><li><code>&lt;补偿队列文件&gt;</code></li></ul></div>
+</div>
+<details class="src plain"><summary>原始工件（trace.yaml）</summary><pre>- req: REQ-OrderSvc-012
+  scenarios: [cancel.paid, cancel.shipped,
+              cancel.inventory-timeout]
+  tasks: [T3, T4]
+  tests: [&lt;测试文件路径&gt;]
+  code: [&lt;实现文件&gt;, &lt;补偿队列文件&gt;]
+</pre></details>
+<div class="note ok">C6 门禁：<code>check_trace</code> 对每条 REQ 检查"有场景、有任务、有测试、有代码映射"，任一缺失即阻断；schema 字段未映射到生成代码同样阻断。</div>
+</div>
+</div>
+</section>
+
+<section id="s8">
+<h2><span class="num">8</span>度量体系</h2>
+<p class="sub">首要指标是 SDD 通道采用率，它直接反映流程过重的问题有没有缓解。质量看遗漏率，文档只看生成物被人工修改的次数。</p>
+<div class="viz"><h5>十七个指标，分六类；每期结束复盘一次判据与阈值</h5><div class="metrics">
+<div class="metric star"><h6>首要指标</h6><ul>
+<li><b>SDD 通道采用率</b><span>走 SDD 通道的变更 / 全部变更</span> <em>↑</em></li></ul></div>
+<div class="metric"><h6>效率</h6><ul>
+<li><b>通道端到端时长</b><span>各通道 P50 / P90</span> <em>轻 ≤ 30 分钟，标准 ≤ 半天</em></li>
+<li><b>spec-init 时长</b><span>P50</span> <em>≤ 10 分钟</em></li>
+<li><b>人工介入次数 / 变更</b><span>该变更的决策包数</span> <em>轻 ≤ 1，标准 ≤ 2</em></li>
+<li><b>人工撰写字数 / 变更</b><span>人写的文档字符数</span> <em>趋近 0（只确认不撰写）</em></li></ul></div>
+<div class="metric"><h6>质量</h6><ul>
+<li><b>一次通过率</b><span>首次门禁 + 合规检查通过的变更占比</span> <em>↑</em></li>
+<li><b>遗漏率</b><span>合规检查 Fail 条目 / 需求条目</span> <em>&lt; 2%</em></li>
+<li><b>编译修复循环次数</b><span>每变更编译失败 → 修复轮次</span> <em>↓</em></li>
+<li><b>复杂度超标数</b><span>门禁报告的超阈值函数数</span> <em>↓</em></li>
+<li><b>归档修正次数</b><span>人工修正归档结果的次数</span> <em>→ 0</em></li></ul></div>
+<div class="metric"><h6>上下文</h6><ul>
+<li><b>实现任务压缩触发次数</b><span>实现类子代理触发压缩的次数</span> <em>= 0</em></li>
+<li><b>地图命中率</b><span>固定问答集 top-5 定位正确率</span> <em>≥ 85%</em></li>
+<li><b>上下文 token 占用</b><span>实际装载 / 预算</span> <em>不超预算</em></li></ul></div>
+<div class="metric"><h6>自治</h6><ul>
+<li><b>自愈成功率</b><span>CI 失败由自愈 agent 修复的占比</span> <em>↑</em></li>
+<li><b>合规检查漏报率 / 误报率</b><span>人工复核对照</span> <em>漏报 ↓，误报可接受</em></li></ul></div>
+<div class="metric"><h6>文档</h6><ul>
+<li><b>生成物手改次数</b><span>描述层文件的人工提交数</span> <em>= 0</em></li>
+<li><b>spec 自动生成占比</b><span>agent 起草的 spec / 全部 spec</span> <em>↑（不看覆盖率）</em></li></ul></div>
+</div><div class="cap">图 12 · 度量体系。首要指标只有一个；文档侧只看生成物被人工修改的次数</div></div>
+</section>
+
+<section id="s9">
+<h2><span class="num">9</span>路线图</h2>
+<p class="sub">前两周先做不改引擎架构的改进，然后改引擎，再补上下文与多仓能力，之后持续扩大自动化范围。每期结束根据数据调整分级阈值、任务粒度上限、修复轮次和门禁阈值。</p>
+<div class="roadmap"><div class="rm">
+<div class="row h"><div class="h" style="text-align:left">周 →</div><div class="h" style="grid-column:span 2">P0 快速改进 1–2</div><div class="h" style="grid-column:span 6">P1 引擎改造 3–8</div><div class="h" style="grid-column:span 8">P2 上下文与多仓 9–16</div><div class="h" style="grid-column:span 4">P3 持续 17+</div></div>
+<div class="row"><div class="l">C5 需求与场景模板</div><i class="bar p0" style="grid-column:2/4"></i></div>
+<div class="row"><div class="l">C7 执行编排</div><i class="bar p0" style="grid-column:2/4"></i></div>
+<div class="row"><div class="l">C8 确定性质量门禁</div><i class="bar p0" style="grid-column:2/4"></i></div>
+<div class="row"><div class="l">C10 验证清单 → CI 自愈</div><i class="bar p01" style="grid-column:2/10"></i></div>
+<div class="row"><div class="l">C11 归档 dry-run → ADR</div><i class="bar p01" style="grid-column:2/10"></i></div>
+<div class="row"><div class="l">C1 变更分级器</div><i class="bar p1" style="grid-column:4/10"></i></div>
+<div class="row"><div class="l">C2 增量 spec-init</div><i class="bar p1" style="grid-column:4/10"></i></div>
+<div class="row"><div class="l">C6 追溯矩阵 + schema-first</div><i class="bar p1" style="grid-column:4/10"></i></div>
+<div class="row"><div class="l">C9 合规检查（shadow → 阻断）</div><i class="bar p12" style="grid-column:4/18"></i></div>
+<div class="row"><div class="l">C3 符号地图与 Topic 索引</div><i class="bar p2" style="grid-column:10/18"></i></div>
+<div class="row"><div class="l">C4 多仓工作区</div><i class="bar p2" style="grid-column:10/18"></i></div>
+<div class="row"><div class="l">C12 漂移检测与所有权</div><i class="bar p2" style="grid-column:10/18"></i></div>
+<div class="row"><div class="l">C13 度量（基线 → 看板）</div><i class="bar p012" style="grid-column:2/18"></i></div>
+<div class="row"><div class="l">保真度测试 · 自动化分级扩大 · 更多语言</div><i class="bar p3" style="grid-column:18/21"></i></div>
+</div>
+<div class="legend"><span><i style="background:var(--blue)"></i>P0 快速改进</span><span><i style="background:var(--teal)"></i>P1 引擎改造</span><span><i style="background:var(--amber)"></i>P2 上下文与多仓</span><span><i style="background:var(--violet)"></i>P3 持续</span></div>
+</div>
+<div class="grid g2">
+<div class="card"><h4><span class="tag">P0</span> Phase 0 快速改进（第 1–2 周），不改引擎架构</h4><ul><li>verify.yaml 规范 + 编译前置 + 修复轮次上限（#5）</li><li>一任务一上下文 + 状态外置（#7）</li><li>linter / 复杂度门禁进"完成前检查" + 范例文件锚点（#10）</li><li>需求模板三栏 + 必答清单（#6）；归档 dry-run + validate（#8）；指标基线采集</li></ul><p class="iface">验收：1 个试点产品跑 ≥ 10 个变更；合并前编译错误 = 0；实现任务压缩触发 = 0；建立一次通过率、时长、人工介入次数基线。</p></div>
+<div class="card"><h4><span class="tag a">P1</span> Phase 1 引擎改造（第 3–8 周）</h4><ul><li>分级器 + 轻 / 标准通道（#1）</li><li>增量 spec-init + 指纹缓存（#1）</li><li>需求 ID + trace + schema-first 生成（#2 #9）</li><li>合规检查 agent shadow 模式（#2 #9）；CI 自愈 agent（#5）；ADR 门槛 + 补录时限</li></ul><p class="iface">验收：轻通道 P50 ≤ 30 分钟；采用率 ≥ 60%；遗漏率 &lt; 5%；合规检查漏报 / 误报基线完成。</p></div>
+<div class="card"><h4><span class="tag c">P2</span> Phase 2 上下文与多仓（第 9–16 周）</h4><ul><li>符号地图（主语言适配器）+ Topic 索引（#4）</li><li>契约仓 + 协调仓 + workspace 组装器（#3）</li><li>漂移检测 + 所有权标记 + steering 回灌；度量看板；合规检查转阻断</li></ul><p class="iface">验收：地图命中率 ≥ 85%；跨仓变更一次通过率提升；生成物手改 = 0；遗漏率 &lt; 2%。</p></div>
+<div class="card"><h4><span class="tag b">P3</span> Phase 3 持续（16 周后）</h4><ul><li>保真度测试（参考实现 = 现有生产系统）用于核心服务</li><li>自动化分级扩大低风险自动通过</li><li>更多语言适配器；隐性规则事件持续转 ADR / 契约测试；evals 数据集随变更积累</li></ul></div>
+</div>
+<h3>9.1 问题、组件、指标与阶段的对应</h3>
+<table>
+<tr><th>问题</th><th>组件</th><th>指标</th><th>阶段</th></tr>
+<tr><td>1 spec-init 慢 / 流程重</td><td>C1 C2</td><td>采用率、spec-init 时长、通道时长</td><td><span class="tag a">P1</span></td></tr>
+<tr><td>2 字段遗漏</td><td>C5 C6 C9</td><td>字段遗漏数、遗漏率</td><td><span class="tag">P0</span>/<span class="tag a">P1</span></td></tr>
+<tr><td>3 跨仓隐性规则</td><td>C3 C4</td><td>跨仓一次通过率、隐性规则事件数</td><td><span class="tag c">P2</span></td></tr>
+<tr><td>4 codewiki 颗粒度粗</td><td>C3</td><td>地图命中率、Topic 修改率</td><td><span class="tag c">P2</span></td></tr>
+<tr><td>5 编译错误反复</td><td>C10</td><td>编译修复循环、自愈成功率</td><td><span class="tag">P0</span>/<span class="tag a">P1</span></td></tr>
+<tr><td>6 时序图缺异常</td><td>C5 C9</td><td>三栏完整率、异常测试存在率</td><td><span class="tag">P0</span></td></tr>
+<tr><td>7 压缩后能力衰减</td><td>C7</td><td>压缩触发次数、长任务完成率</td><td><span class="tag">P0</span></td></tr>
+<tr><td>8 归档不准</td><td>C11</td><td>归档修正次数</td><td><span class="tag">P0</span>/<span class="tag a">P1</span></td></tr>
+<tr><td>9 功能遗漏</td><td>C6 C9</td><td>遗漏率、漏报率</td><td><span class="tag a">P1</span></td></tr>
+<tr><td>10 规范不达标</td><td>C8</td><td>一次门禁通过率、复杂度超标数</td><td><span class="tag">P0</span></td></tr>
+<tr><td>抛弃式文档矛盾</td><td>C12</td><td>生成物手改次数、修正保留率</td><td><span class="tag c">P2</span></td></tr>
+</table>
+</section>
+
+<section id="s10">
+<h2><span class="num">10</span>风险与对策</h2>
+<table>
+<tr><th>风险</th><th>对策</th></tr>
+<tr><td>产业用户抵触"又是文档"</td><td>轻通道 + 只确认不撰写；不考核文档覆盖率；提案压到一页；人工介入点固定为三个</td></tr>
+<tr><td>门禁慢拖垮吞吐</td><td>增量编译、并行、缓存；门禁时长纳入指标；门禁速度优先于门禁数量</td></tr>
+<tr><td>合规检查误报导致不信任</td><td>shadow 先行；每条 Fail 带证据；证据不足降为提示项</td></tr>
+<tr><td>契约仓变成新治理负担</td><td>只对波及接口强制；schema-first 从代码生成契约优先</td></tr>
+<tr><td>agent 改测试 / 门禁作弊</td><td>凭据分离；测试期望在参考实现上验证；门禁在 agent 写不到的路径（见第 11 节 METR / ImpossibleBench 证据）</td></tr>
+<tr><td>符号地图语言覆盖不足</td><td>先主语言；未覆盖语言降级为 codewiki + 文本检索</td></tr>
+<tr><td>与 CoreALM-Next 边界争议</td><td><b>已确认：SDD 工具链独立建设、独立运行</b>；平台只通过 M7 连接器调用，用试点数据再定内化（见方案 B）</td></tr>
+<tr><td>长任务仍然散</td><td>粒度上限 + 禁止压缩 + 强制拆分 + 状态外置</td></tr>
+<tr><td>模型差异导致效果波动</td><td>evals 数据集随变更积累；模型路由与版本记入执行基线</td></tr>
+</table>
+</section>
+
+<section id="s11">
+<h2><span class="num">11</span>外部解决方案与实践参考</h2>
+<p class="sub">每一行对应本方案的某个组件或原则。"要义"一栏写的是可以借用的部分，不代表全盘采用。</p>
+<table class="ref">
+<tr><th>名称</th><th>类型</th><th>对应</th><th>要义</th><th>链接</th></tr>
+<tr class="grp"><td colspan="5">流派与争论：SDD 为什么会变重</td></tr>
+<tr><td><a href="https://blog.scottlogic.com/2025/11/26/putting-spec-kit-through-its-paces-radical-idea-or-reinvented-waterfall.html" target="_blank" rel="noopener">Scott Logic · Spec Kit 实测</a></td><td>评测</td><td>C1 三通道</td><td>普通做法 15 分钟评审 + 9 分钟测试即完成；spec 流程的时间主要耗在评审 markdown，说明应该压缩文档评审而不是增加</td><td><a href="https://blog.scottlogic.com/2025/11/26/putting-spec-kit-through-its-paces-radical-idea-or-reinvented-waterfall.html" target="_blank" rel="noopener">blog</a></td></tr>
+<tr><td><a href="https://marmelab.com/blog/2025/11/12/spec-driven-development-waterfall-strikes-back.html" target="_blank" rel="noopener">Marmelab · Waterfall Strikes Back</a></td><td>评论</td><td>P1</td><td>把 SDD 做成前置瀑布是风险；前置文档消不掉"什么才有用"的不确定性</td><td><a href="https://marmelab.com/blog/2025/11/12/spec-driven-development-waterfall-strikes-back.html" target="_blank" rel="noopener">blog</a></td></tr>
+<tr><td><a href="https://www.scrum.org/resources/blog/spec-driven-development-isnt-waterfall-unless-youre-using-it-way-0" target="_blank" rel="noopener">Scrum.org</a></td><td>评论</td><td>P7</td><td>SDD 不是瀑布，除非你用它消除所有不确定性；度量应看结果而非文档</td><td><a href="https://www.scrum.org/resources/blog/spec-driven-development-isnt-waterfall-unless-youre-using-it-way-0" target="_blank" rel="noopener">blog</a></td></tr>
+<tr><td><a href="https://www.thoughtworks.com/en-cn/radar/tools/openspec" target="_blank" rel="noopener">Thoughtworks Radar · OpenSpec</a></td><td>行业评估</td><td>C2</td><td>Assess → Trial：增量 delta 对应持久的 spec，是目前较合理的轻量化形态</td><td><a href="https://www.thoughtworks.com/en-cn/radar/tools/openspec" target="_blank" rel="noopener">radar</a></td></tr>
+<tr><td><a href="https://cloud.tencent.com.cn/developer/article/2631688" target="_blank" rel="noopener">腾讯云 · 分级混合</a></td><td>实践</td><td>C1</td><td>按变更风险分级采用不同重量的 SDD 流程</td><td><a href="https://cloud.tencent.com.cn/developer/article/2631688" target="_blank" rel="noopener">文章</a></td></tr>
+<tr class="grp"><td colspan="5">规范与验收：让文档可执行</td></tr>
+<tr><td><a href="https://github.com/Fission-AI/OpenSpec" target="_blank" rel="noopener">OpenSpec</a></td><td>工具</td><td>C2 C11</td><td>specs 纯 Markdown；change 内写 ADDED Requirements + Scenario WHEN/THEN；archive 合并回主 spec</td><td><a href="https://github.com/Fission-AI/OpenSpec" target="_blank" rel="noopener">github</a></td></tr>
+<tr><td><a href="https://github.com/github/spec-kit" target="_blank" rel="noopener">GitHub Spec Kit</a></td><td>工具</td><td>C5</td><td>specify → plan → tasks → implement 的四段式；对照参考其"阶段数"与本文三通道的差异</td><td><a href="https://github.com/github/spec-kit" target="_blank" rel="noopener">github</a></td></tr>
+<tr><td><a href="https://kiro.dev/docs/specs/feature-specs/requirements-first/" target="_blank" rel="noopener">Kiro · EARS 需求</a></td><td>工具</td><td>C5 C8</td><td>需求用 EARS 句式 + 逐条验收准则；steering 只解释"为什么"，hooks 执行确定性检查</td><td><a href="https://kiro.dev/docs/specs/feature-specs/requirements-first/" target="_blank" rel="noopener">docs</a></td></tr>
+<tr><td><a href="https://www.computerweekly.com/blog/CW-Developer-Network/AWS-launches-Kiro-IDE-for-real-agentic-development-at-scale" target="_blank" rel="noopener">Kiro · feature vs bugfix</a></td><td>文章</td><td>C1</td><td>区分 feature spec 与 bugfix 工作流，是分级入口的直接依据</td><td><a href="https://www.computerweekly.com/blog/CW-Developer-Network/AWS-launches-Kiro-IDE-for-real-agentic-development-at-scale" target="_blank" rel="noopener">文章</a></td></tr>
+<tr><td><a href="https://sddobservatory.com/frameworks/tessl/" target="_blank" rel="noopener">Tessl</a></td><td>工具</td><td>C6</td><td>.spec.md + YAML frontmatter，每条 requirement 用 <code>@test</code> 挂测试；<code>tessl document</code> 从代码反向生成</td><td><a href="https://sddobservatory.com/frameworks/tessl/" target="_blank" rel="noopener">sddobservatory</a> · <a href="https://securityboulevard.com/2026/06/7-spec-driven-development-tools-spec-kit-kiro-openspec-tessl-more/" target="_blank" rel="noopener">对比文</a></td></tr>
+<tr><td><a href="https://blog.allegro.tech/2026/06/spec-driven-development-best-practices" target="_blank" rel="noopener">Allegro · SDD 最佳实践</a></td><td>实践</td><td>C5 C6</td><td>每任务 acceptance criteria；文档服务于执行而非审批</td><td><a href="https://blog.allegro.tech/2026/06/spec-driven-development-best-practices" target="_blank" rel="noopener">blog</a></td></tr>
+<tr><td><a href="https://www.aboutamazon.com/news/aws/how-autonomous-ai-agents-built-aws-emulator" target="_blank" rel="noopener">AWS Emulator</a></td><td>案例</td><td>C9 C10</td><td>Spec + Reference + Fidelity Tests；写测试 / 找问题 / 修问题三角色分离；合并门禁速度决定吞吐</td><td><a href="https://www.aboutamazon.com/news/aws/how-autonomous-ai-agents-built-aws-emulator" target="_blank" rel="noopener">aws</a> · <a href="https://github.com/aws/aws-emulator" target="_blank" rel="noopener">github</a></td></tr>
+<tr class="grp"><td colspan="5">存量与上下文：能定位到符号的上下文</td></tr>
+<tr><td><a href="https://docs.devin.ai/work-with-devin/deepwiki" target="_blank" rel="noopener">DeepWiki</a></td><td>工具</td><td>C3</td><td>仓库自动生成 wiki；适合作为"描述层"，颗粒度粗，需要符号地图与 Topic 索引补齐</td><td><a href="https://docs.devin.ai/work-with-devin/deepwiki" target="_blank" rel="noopener">docs</a> · <a href="https://deepwiki.com/d-bui/deepwiki-open/1.1-key-features" target="_blank" rel="noopener">open</a></td></tr>
+<tr><td><a href="https://pypi.org/project/specfact-cli/0.14.0/" target="_blank" rel="noopener">SpecFact</a></td><td>工具</td><td>C2 C6</td><td>Python 存量 → spec → contract 的逆向生成</td><td><a href="https://pypi.org/project/specfact-cli/0.14.0/" target="_blank" rel="noopener">pypi</a></td></tr>
+<tr><td><a href="https://github.com/istarwyh/mcpadvisor/blob/34c71f8eab2029f617b845b47cc5fe63a4efacab/.bmad-core/working-in-the-brownfield.md" target="_blank" rel="noopener">BMAD brownfield 指南</a></td><td>方法</td><td>C2</td><td>存量项目先建最小结构模型再动手；机器生成底座、人只确认</td><td><a href="https://github.com/istarwyh/mcpadvisor/blob/34c71f8eab2029f617b845b47cc5fe63a4efacab/.bmad-core/working-in-the-brownfield.md" target="_blank" rel="noopener">github</a></td></tr>
+<tr><td><a href="https://github.com/agentpatterns-ai/website/blob/main/context-engineering/repository-map-pattern.md" target="_blank" rel="noopener">Repository Map 模式</a></td><td>模式</td><td>C3</td><td>tree-sitter AST + PageRank + token 预算的仓库地图</td><td><a href="https://github.com/agentpatterns-ai/website/blob/main/context-engineering/repository-map-pattern.md" target="_blank" rel="noopener">github</a></td></tr>
+<tr><td><a href="https://github.com/Th3Mouk/Maestro/blob/main/README.md" target="_blank" rel="noopener">Maestro / NexusFlow</a></td><td>工具</td><td>C4</td><td>协调仓 + 依赖图的多仓编排思路</td><td><a href="https://github.com/Th3Mouk/Maestro/blob/main/README.md" target="_blank" rel="noopener">maestro</a> · <a href="https://www.npmjs.com/package/@mrpatronz/nexusflow/v/1.3.0" target="_blank" rel="noopener">nexusflow</a> · <a href="https://raw.githubusercontent.com/vasilyu1983/AI-Agents-public/refs/heads/main/frameworks/shared-skills/skills/dev-context-engineering/references/multi-repo-strategy.md" target="_blank" rel="noopener">多仓策略</a></td></tr>
+<tr><td><a href="https://agents.md" target="_blank" rel="noopener">AGENTS.md</a></td><td>标准</td><td>C4 规则层</td><td>仓内规则文件的事实标准；基线段生成 + 路径级覆盖</td><td><a href="https://agents.md" target="_blank" rel="noopener">agents.md</a> · <a href="https://github.com/agentpatterns-ai/website/blob/main/standards/agents-md.md" target="_blank" rel="noopener">说明</a></td></tr>
+<tr class="grp"><td colspan="5">执行与验证</td></tr>
+<tr><td><a href="https://code.claude.com/docs/en/github-actions" target="_blank" rel="noopener">Claude Code GitHub Actions</a></td><td>工具</td><td>C10</td><td>CI 失败后由 agent 在流水线内自动修复的模式</td><td><a href="https://code.claude.com/docs/en/github-actions" target="_blank" rel="noopener">docs</a></td></tr>
+<tr><td><a href="https://github.com/higress-group/himarket/blob/3a63fc58cb308afcaa8e193b37ee1d5c9f36991a/.qoder/skills/harness-executor/references/subagent-patterns.md" target="_blank" rel="noopener">子代理模式</a></td><td>模式</td><td>C7</td><td>协调者不碰编辑工具；子代理一任务一新鲜上下文，只回传摘要</td><td><a href="https://github.com/higress-group/himarket/blob/3a63fc58cb308afcaa8e193b37ee1d5c9f36991a/.qoder/skills/harness-executor/references/subagent-patterns.md" target="_blank" rel="noopener">github</a></td></tr>
+<tr><td><a href="https://current.tinyfish.ai/issue/31/foundations/article/18061/where-agent-behavior-actually-gets-decided" target="_blank" rel="noopener">长会话衰减实证</a></td><td>研究</td><td>C7</td><td>30 分钟内准确，60 分钟开始漏 import，90 分钟出现 tunnel vision；这是任务粒度上限和禁止压缩的依据</td><td><a href="https://current.tinyfish.ai/issue/31/foundations/article/18061/where-agent-behavior-actually-gets-decided" target="_blank" rel="noopener">文章</a> · <a href="https://github.com/tomcounsell/ai/issues/1107" target="_blank" rel="noopener">压缩丢状态</a></td></tr>
+<tr><td><a href="https://www.npmjs.com/package/@rigour-labs/mcp/v/4.0.5" target="_blank" rel="noopener">Rigour</a></td><td>工具</td><td>C8</td><td>23 项检查含复杂度，"进行中"而非提交后；白皮书给出量化口径</td><td><a href="https://www.npmjs.com/package/@rigour-labs/mcp/v/4.0.5" target="_blank" rel="noopener">npm</a> · <a href="https://zenodo.org/records/18673564/files/rigour-whitepaper-zenodo.pdf" target="_blank" rel="noopener">白皮书</a></td></tr>
+<tr><td><a href="https://arxiv.org/abs/2402.09171" target="_blank" rel="noopener">Meta TestGen-LLM</a></td><td>论文</td><td>C6 C9</td><td>75% 测试能构建、57% 稳定通过、25% 提升覆盖；幸存者接受率约 73%，可作为自动生成验收测试的预期参考</td><td><a href="https://arxiv.org/abs/2402.09171" target="_blank" rel="noopener">arxiv</a></td></tr>
+<tr><td><a href="https://dl.acm.org/doi/pdf/10.1145/3696630.3728544" target="_blank" rel="noopener">Meta ACH</a></td><td>论文</td><td>C9</td><td>7 平台、10,795 类 → 571 测试，73% 接受；独立"找问题"角色有效的证据</td><td><a href="https://dl.acm.org/doi/pdf/10.1145/3696630.3728544" target="_blank" rel="noopener">acm</a></td></tr>
+<tr><td><a href="https://www.anthropic.com/engineering/building-c-compiler" target="_blank" rel="noopener">Anthropic · C 编译器实验</a></td><td>案例</td><td>C7</td><td>16 并行 agent、约 2,000 会话、10 万行 Rust；作者不建议使用，说明并行子代理能上量但不能替代门禁</td><td><a href="https://www.anthropic.com/engineering/building-c-compiler" target="_blank" rel="noopener">anthropic</a></td></tr>
+<tr><td><a href="https://metr.org/evaluations/openai-o3-report/" target="_blank" rel="noopener">METR · o3 评测</a></td><td>研究</td><td>C10 凭据分离</td><td>o3 在 30.4% 的 RE-Bench 运行中出现 reward hacking，门禁必须放在 agent 写不到的路径</td><td><a href="https://metr.org/evaluations/openai-o3-report/" target="_blank" rel="noopener">metr</a></td></tr>
+<tr><td><a href="https://arxiv.org/abs/2510.20270" target="_blank" rel="noopener">ImpossibleBench</a></td><td>论文</td><td>C10 凭据分离</td><td>模型能让"不可能通过"的测试通过，所以测试期望要先在参考实现上验证</td><td><a href="https://arxiv.org/abs/2510.20270" target="_blank" rel="noopener">arxiv</a></td></tr>
+<tr class="grp"><td colspan="5">文档治理：生成物可重生成，人工修正不丢</td></tr>
+<tr><td><a href="https://pypi.org/project/docdrift/" target="_blank" rel="noopener">DocDrift</a></td><td>工具</td><td>C12</td><td>提交前扫 staged diff 标记过时文档</td><td><a href="https://pypi.org/project/docdrift/" target="_blank" rel="noopener">pypi</a></td></tr>
+<tr><td><a href="https://pypi.org/project/constant-docs/0.7.0/" target="_blank" rel="noopener">constant-docs</a></td><td>工具</td><td>C12</td><td>所有权块；apply 拒绝覆盖未标记内容；adopt 纳管</td><td><a href="https://pypi.org/project/constant-docs/0.7.0/" target="_blank" rel="noopener">pypi</a></td></tr>
+<tr><td><a href="https://packages.ecosyste.ms/registries/npmjs.org/packages/llm-wiki-governance" target="_blank" rel="noopener">llm-wiki-governance</a></td><td>工具</td><td>C12 C3</td><td>impact / drift 检查，lite / standard / strict 三档</td><td><a href="https://packages.ecosyste.ms/registries/npmjs.org/packages/llm-wiki-governance" target="_blank" rel="noopener">npm</a></td></tr>
+<tr><td><a href="https://cloud.tencent.com.cn/developer/article/2656315" target="_blank" rel="noopener">腾讯云 · spec-on-touch 流程</a></td><td>实践</td><td>C2 C12</td><td>热点 → 影响面 → change 内补 delta → archive 门禁 → CI 守护 → 可执行验收</td><td><a href="https://cloud.tencent.com.cn/developer/article/2656315" target="_blank" rel="noopener">文章</a></td></tr>
+<tr><td><a href="https://github.com/kdlbs/kandev/blob/9c169e5d22a09772c2890f2eec0c9d445113620c/.agents/skills/record/SKILL.md" target="_blank" rel="noopener">ADR 门槛与补录</a></td><td>实践</td><td>C11</td><td>ADR 只记持久约束 / 契约 / 边界；hotfix 补录有时限，逾期报警</td><td><a href="https://github.com/kdlbs/kandev/blob/9c169e5d22a09772c2890f2eec0c9d445113620c/.agents/skills/record/SKILL.md" target="_blank" rel="noopener">kandev</a> · <a href="https://cloud.tencent.com.cn/developer/ask/2213818/answer/2954916" target="_blank" rel="noopener">补录</a></td></tr>
+<tr><td><a href="https://raw.githubusercontent.com/akillness/jeo-skills/HEAD/.agent-skills/technical-writing/references/docs-as-code-and-maintenance.md" target="_blank" rel="noopener">Docs as Code</a></td><td>方法</td><td>P3</td><td>文档与代码同仓同评审；生成物与手写物分离</td><td><a href="https://raw.githubusercontent.com/akillness/jeo-skills/HEAD/.agent-skills/technical-writing/references/docs-as-code-and-maintenance.md" target="_blank" rel="noopener">参考</a></td></tr>
+</table>
+<div class="note">证据边界：带完整闭环数字的公开证据仍然不多。Meta 两篇论文给出的是自动生成测试的预期效果，Anthropic 实验说明并行子代理能上量但不能替代门禁，METR 和 ImpossibleBench 说明门禁必须放在 agent 写不到的位置。本方案每期的验收指标，就是为了在自有试点里把这些数字测出来。</div>
+</section>
+
+<section id="s12">
+<h2><span class="num">12</span>待确认事项与相关文档</h2>
+<table>
+<tr><th>#</th><th>事项</th><th>状态</th></tr>
+<tr><td>1</td><td>SDD 工具链作为 CoreALM-Next builtin 作业系统接入，还是独立工具链</td><td><span class="tag ok">已确认 · 独立工具链</span>，以斜杠命令 + Skill 包 + MCP 服务发布，由 CodeAgent CLI 命令触发（如 <code>/spec-init …</code>），无独立 SDD CLI；引导优先走 CoreALM-Next，本地单独跑保留（见 §4.3 与方案 B）</td></tr>
+<tr><td>2</td><td>主语言与技术栈清单 → 符号地图适配器优先级</td><td><span class="tag gray">待确认</span></td></tr>
+<tr><td>3</td><td>试点产品与试点团队</td><td><span class="tag gray">待确认</span></td></tr>
+<tr><td>4</td><td>契约格式（OpenAPI / proto / JSON Schema / 混合）</td><td><span class="tag gray">待确认</span></td></tr>
+<tr><td>5</td><td>分级判据阈值初值、任务粒度上限、自愈与合规检查轮次上限</td><td><span class="tag gray">待确认</span></td></tr>
+<tr><td>6</td><td>合规检查 agent 的模型选择与凭据边界</td><td><span class="tag gray">待确认</span></td></tr>
+<tr><td>7</td><td>门禁运行位置与 CI 凭据分离方案</td><td><span class="tag gray">待确认</span></td></tr>
+</table>
+<div class="card">
+<h4>相关文档</h4>
+<ul>
+<li>Markdown 全文：<a href="SDD工具链系统化方案.md">SDD工具链系统化方案.md</a></li>
+<li>平台结合方案：<a href="SDD工具链与CoreALM-Next结合方案.html">SDD工具链与CoreALM-Next结合方案.html</a>（方案 B）</li>
+<li>平台介绍：<a href="CoreALM-Next介绍说明.html">CoreALM-Next介绍说明.html</a></li>
+<li>概念卡：规范驱动的自主Agent开发、决策收件箱、任务续作与现场隔离、薄入口厚语料（见 <code>70-Knowledge/</code>）</li>
+</ul>
+</div>
+</section>
+</main>
+<footer><div class="wrap">SDD 工具链系统化方案 · 草案待评审 · 2026-11-23 · 图示源码位于 <code>sdd-plan-html/puml/</code>，<code>python3 sdd-plan-html/build.py</code> 可重新生成</div></footer>
+</body>
+</html>

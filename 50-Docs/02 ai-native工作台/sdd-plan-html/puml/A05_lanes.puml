@@ -1,0 +1,38 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+skinparam activity {
+  BackgroundColor #FFFFFF
+  DiamondBackgroundColor #FBF5E9
+  ArrowColor #5f767b
+}
+|研发人员|
+start
+:提交变更描述（一句话）;
+|SDD 工具链|
+:C1 分级（确定性规则）;
+switch (通道?)
+case (轻)
+  :起草一页 proposal\n+ 3–5 条可执行验收; <<#teal>>
+case (标准)
+  :C2 增量 spec-init\nspec delta + 设计 + tasks; <<#teal>>
+case (重)
+  :标准工件 + 契约变更稿\n+ 保真度测试计划 + ADR 草案; <<#Wheat>>
+endswitch
+|决策收件箱|
+if (通道 = 轻?) then (是)
+else (否)
+  :人工决策点 1\n范围确认（只看一页）;
+endif
+|SDD 工具链|
+:C7 协调者派发任务\n子代理一任务一新鲜上下文;
+:C8 门禁 + C9 合规检查\n+ C10 CI / 自愈;
+while (全部通过?) is (否)
+  :回修（上限 3 轮，超限转人工）;
+  :重跑门禁;
+endwhile (是)
+|决策收件箱|
+:人工决策点 2\n合并确认（归档 diff + 门禁结果）;
+|SDD 工具链|
+:C11 归档 + ADR\nC12 漂移检测\nC13 度量;
+stop
+@enduml

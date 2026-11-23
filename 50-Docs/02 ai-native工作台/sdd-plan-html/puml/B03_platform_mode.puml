@@ -1,0 +1,30 @@
+@startuml
+skinparam defaultFontName "PingFang SC"
+autonumber
+participant "M2 任务协同" as M2
+participant "M4 作业执行" as M4
+participant "CodeAgent 运行时\n（Skill + MCP）" as A
+participant "sdd-mcp 服务" as M
+participant "M17 / M18 / M10" as ENV
+participant "M11 执行记录" as M11
+M2 -> M4 : 下发 Task\n来源 / 用户 / 输入 / 采用配置
+M4 -> ENV : 环境需求（镜像预装 sdd-mcp）\n模型路由；冻结 Skill / MCP 版本
+ENV --> M4 : 分配回执 + 执行基线
+M4 -> A : 启动运行时，装载 Skill 包与 MCP\n以同一条 /spec-init 命令开始
+A -> M : sdd_triage / spec_init / context / gate / archive
+M --> A : 结构化结果（含 decision_required）
+note right of M
+  以发起用户身份
+  读写代码仓、触发 CI
+end note
+M4 -> M11 : 事件 JSONL、工具调用日志、证据引用
+alt 工具返回 decision_required 或门禁超轮次
+  M4 -> M2 : AI 断点 → 生成人工待办（决策包）
+else 通过
+  M4 -> M2 : 结果待用户确认 → 更新来源 Task
+end
+note over M4
+  M4 是执行状态的唯一权威
+  sdd-mcp 只上报事件，不另建状态
+end note
+@enduml
