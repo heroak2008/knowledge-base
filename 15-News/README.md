@@ -1,10 +1,11 @@
 # 15-News · AI 资讯索引（MOC）
 
 > 本文件由每日任务自动维护，作为资讯分区的检索入口。
-> 最后更新：2026-11-23
+> 最后更新：2026-11-24
 
 ## 📅 日报（每日 09:00 更新）
 
+- [2026-11-24 · AI资讯日报](2026-11-24-AI资讯日报.md) —— **GLM-5.4发布：首个loop transformer主打通用编码(HN 1042)**；Amodei 2015"游戏安抚失业大众"言论翻出；GTA6重编译演变为兼容层基建赛道(xcl 2.5k/VIctory/xnulinux)
 - [2026-11-23 · AI资讯日报](2026-11-23-AI资讯日报.md) —— 黎曼假设Lean证明(Alpöge×Claude)引爆数学圈；Leonida三天15.5k；fast-anything新流派(只重写慢的5%)；Do Not Accept反AI slop
 - [2026-11-22 · AI资讯日报](2026-11-22-AI资讯日报.md) —— 联合国自主武器管控谈判崩溃；GTA6重编译生态爆发(Leonida 2天5.6k)；rust-anything 7.4k；blender-ai-mcp 2.0k
 - [2026-11-21 · AI资讯日报](2026-11-21-AI资讯日报.md) —— **Anthropic IPO破发(AI股$4万亿蒸发)**；Inkling 2 Mini发布(HN 716)；Apple自研AI Agent；Google员工联名护学校；rust-anything 6.7k；blender-ai-mcp 1.8k
