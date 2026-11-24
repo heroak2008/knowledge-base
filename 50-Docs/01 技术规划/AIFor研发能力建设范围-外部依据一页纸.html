@@ -6,53 +6,62 @@
 <title>AI for 研发能力建设范围 · 外部依据（一页）</title>
 <!--
   一页 PPT（16:9，1600×900 基准，自动缩放适配窗口；打印时按 13.333in×7.5in 横向输出）
-  表格三列：方向 | 素材原文 | 来源。每个方向 ≤3 条素材，同一来源在一个方向内只出现一次（可截取、拼接）。
-  来源优先 Gartner / Anthropic / NVIDIA / 信通院。原文出处与完整对照见同目录 AIFor研发能力建设范围-外部依据对照表.md
+  表格四列：方向 | 素材原文 | 来源 | 国内实践（补充）。材料全部取 2026 年。
+  每个方向 ≤3 条主素材，同一份报告在一个方向内只出现一次（可截取、拼接）；来源优先 Gartner / Anthropic / NVIDIA / 信通院。
+  第四列是腾讯 / 阿里云 / 字节 / 百度 2026 年的公开实践，作为补充参考。原文出处见同目录 AIFor研发能力建设范围-外部依据对照表.md
 -->
 <style>
   :root{
     --ink:#1c2b30; --ink-2:#3a4a50; --muted:#6b7a80; --line:#d9e2df; --line-2:#eef3f1;
     --teal:#187361; --teal-soft:#edf6f2; --amber:#ac7727; --amber-soft:#fbf5e9;
-    --blue:#5277a2; --blue-soft:#eef3f9;
+    --blue:#5277a2; --blue-soft:#eef3f9; --violet:#6a5a9e; --violet-soft:#f1eef8;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:#e9eeec;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
   body{display:flex;align-items:center;justify-content:center;overflow:hidden}
   .slide{position:relative;width:1600px;height:900px;background:#fff;flex:none;transform-origin:center center;
-         padding:24px 40px 16px;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(20,40,36,.12)}
+         padding:16px 40px 10px;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(20,40,36,.12)}
   /* 头部 */
-  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:8px;border-bottom:3px solid var(--teal)}
-  .head h1{margin:0;font-size:26px;line-height:1.2;font-weight:700;letter-spacing:.2px}
-  .head h1 small{font-size:17px;font-weight:500;color:var(--muted);margin-left:14px}
-  .head .meta{font-size:12.5px;color:var(--muted);text-align:right;line-height:1.5;white-space:nowrap}
+  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:5px;border-bottom:3px solid var(--teal)}
+  .head h1{margin:0;font-size:23px;line-height:1.2;font-weight:700;letter-spacing:.2px}
+  .head h1 small{font-size:16px;font-weight:500;color:var(--muted);margin-left:14px}
+  .head .meta{font-size:12px;color:var(--muted);text-align:right;line-height:1.5;white-space:nowrap}
   .head .meta b{color:var(--teal)}
-  .sub{margin:7px 0 8px;font-size:12.5px;color:var(--ink-2)}
-  .sub .lg{display:inline-block;margin-right:16px}
+  .sub{margin:6px 0 7px;font-size:12px;color:var(--ink-2)}
+  .sub .lg{display:inline-block;margin-right:14px}
   .sub .lg i{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:5px}
   /* 表格 */
   table{width:100%;border-collapse:collapse;table-layout:fixed;flex:none}
-  col.c-dir{width:186px} col.c-src{width:236px}
-  thead th{background:var(--teal-soft);color:var(--teal);font-size:13px;font-weight:700;text-align:left;padding:5px 10px;border-bottom:2px solid var(--teal);letter-spacing:.5px}
+  col.c-dir{width:140px} col.c-src{width:176px} col.c-cn{width:520px}
+  thead th{background:var(--teal-soft);color:var(--teal);font-size:12px;font-weight:700;text-align:left;padding:4px 8px;border-bottom:2px solid var(--teal);letter-spacing:.5px}
+  thead th.cn{background:var(--violet-soft);color:var(--violet);border-bottom-color:var(--violet)}
   tbody.dir{border-bottom:1px solid var(--line)}
   tbody.dir:last-child{border-bottom:2px solid var(--teal)}
-  td{vertical-align:top;padding:4px 10px;font-size:13px;line-height:1.34}
-  td.dir{padding:6px 10px;border-right:1px solid var(--line);background:#fbfdfc}
-  td.dir .n{font-size:15px;font-weight:700;color:var(--ink);line-height:1.3}
+  td{vertical-align:top;padding:2px 8px;font-size:11px;line-height:1.28}
+  td.dir{padding:5px 9px;border-right:1px solid var(--line);background:#fbfdfc}
+  td.dir .n{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.3}
   td.dir .n .idx{display:inline-block;width:20px;height:20px;line-height:20px;border-radius:50%;background:var(--teal);color:#fff;font-size:11.5px;text-align:center;margin-right:6px;vertical-align:1px}
-  td.dir .scope{font-size:12px;color:var(--muted);line-height:1.35;margin-top:3px}
+  td.dir .scope{font-size:10.5px;color:var(--muted);line-height:1.35;margin-top:3px}
   td.dir .new{display:inline-block;margin-top:5px;font-size:10.5px;color:var(--amber);background:var(--amber-soft);border:1px solid #ead9b8;border-radius:3px;padding:0 5px;line-height:16px}
   td.q{color:var(--ink-2)}
   td.q p{margin:0}
   td.q p b{color:#000;font-weight:700}
   td.q p .en{font-family:"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif}
   td.q .k{display:inline-block;min-width:15px;color:var(--teal);font-weight:700;margin-right:4px}
-  td.src{font-size:11.5px;line-height:1.36;color:var(--muted);border-left:1px solid var(--line);background:#fbfdfc}
+  td.src{font-size:10px;line-height:1.26;color:var(--muted);border-left:1px solid var(--line);background:#fbfdfc}
   td.src .org{display:inline-block;font-size:10.5px;font-weight:700;color:#fff;background:var(--blue);border-radius:3px;padding:0 5px;line-height:15px;margin-right:5px;vertical-align:1px}
   td.src .org.caict{background:var(--amber)} td.src .org.ant{background:#b5544d} td.src .org.nv{background:#5b8a3c}
   td.src a{color:var(--ink-2);text-decoration:none;border-bottom:1px dotted var(--muted)}
   tr.item + tr.item td.q, tr.item + tr.item td.src{border-top:1px dashed var(--line-2)}
+  /* 国内实践列 */
+  td.cn{border-left:2px solid var(--violet);background:#fbfaff;padding:3px 9px}
+  td.cn p{margin:0 0 2px;font-size:10.4px;line-height:1.28;color:var(--ink-2)}
+  td.cn p:last-child{margin-bottom:0}
+  td.cn p b{color:#000;font-weight:700}
+  td.cn .org{display:inline-block;font-size:10.5px;font-weight:700;color:#fff;background:var(--violet);border-radius:3px;padding:0 5px;line-height:15px;margin-right:5px;vertical-align:1px}
+  td.cn a{color:var(--ink-2);text-decoration:none;border-bottom:1px dotted var(--muted)}
   /* 底部 */
-  .foot{margin-top:auto;padding-top:6px;display:flex;justify-content:space-between;gap:24px;font-size:10.5px;color:var(--muted);line-height:1.4}
+  .foot{margin-top:auto;padding-top:4px;display:flex;justify-content:space-between;gap:24px;font-size:10px;color:var(--muted);line-height:1.4}
   .foot .codes b{color:var(--ink-2)}
   .foot a{color:var(--muted);text-decoration:none;border-bottom:1px dotted #b8c4c0}
   @media print{
@@ -66,124 +75,52 @@
 <div class="slide" id="slide">
 
   <div class="head">
-    <h1>AI for 研发能力建设范围：七个方向的外部依据<small>独立软件（ICT）· 一页纸</small></h1>
-    <div class="meta">每方向 ≤3 条 · 同一来源在一个方向内只出现一次 · 优先 <b>Gartner</b> / Anthropic / NVIDIA / <b>信通院</b><br>2026-11-23 · 完整对照见同名 .md</div>
+    <h1>AI for 研发能力建设范围：七个方向的外部依据<small>独立软件（ICT）· 一页纸 · 2026 年材料</small></h1>
+    <div class="meta">每方向 ≤3 条 · 同一报告在一个方向内只出现一次 · 优先 <b>Gartner</b> / Anthropic / NVIDIA / <b>信通院</b><br>右侧为腾讯 / 阿里云 / 字节 / 百度的 2026 年公开实践 · 完整对照见同名 .md</div>
   </div>
-  <div class="sub">
-    <span class="lg"><i style="background:var(--blue)"></i>Gartner 预测 / 规划指南</span>
+  <div class="sub" style="margin:4px 0 5px;font-size:11.5px">
+    <span class="lg"><i style="background:var(--blue)"></i>Gartner 新闻稿（2026-05 / 07 / 10 / 11）</span>
     <span class="lg"><i style="background:var(--amber)"></i>信通院《AI4SE 行业现状调查报告（2026 年）》</span>
-    <span class="lg"><i style="background:#b5544d"></i>Anthropic 工程实践</span>
-    <span class="lg"><i style="background:#5b8a3c"></i>NVIDIA AI Red Team 安全指引</span>
-    <span style="margin-left:10px;color:var(--muted)">加粗为关键字；英文为原文，省略号为截取，"…"两侧可来自同一来源的不同段落</span>
+    <span class="lg"><i style="background:#b5544d"></i>Anthropic（趋势报告 2026-01 · 工程博客 2026-03）</span>
+    <span class="lg"><i style="background:#5b8a3c"></i>NVIDIA AI Red Team 安全指引 2026-01</span>
+    <span class="lg"><i style="background:var(--violet)"></i>国内来源补充（信通院 + 腾讯 / 阿里云 / 字节 / 百度）</span>
+    <span style="margin-left:6px;color:var(--muted)">加粗为关键字；英文为原文，省略号为截取，"…"两侧可来自同一报告的不同段落</span>
   </div>
 
   <table>
-    <colgroup><col class="c-dir"><col><col class="c-src"></colgroup>
-    <thead><tr><th>方向</th><th>素材原文</th><th>来源</th></tr></thead>
+    <colgroup><col class="c-dir"><col><col class="c-src"><col class="c-cn"></colgroup>
+    <thead><tr><th>方向</th><th>素材原文</th><th>来源</th><th class="cn">国内来源补充：信通院调查 + 厂商公开实践</th></tr></thead>
 
-    <!-- 1 知识工程 -->
-    <tbody class="dir">
-      <tr class="item">
-        <td class="dir" rowspan="2"><div class="n"><span class="idx">1</span>知识工程</div><div class="scope">组织知识、编码标准、流程产物对 Agent 可消费</div></td>
-        <td class="q"><p><span class="k">①</span><span class="en">"Harness engineering involves providing AI coding agents with the <b>context</b>, instructions, tools and guardrails needed to perform software engineering tasks reliably. These controls can include access to <b>organisational knowledge</b>, coding standards, development workflows and governance requirements."</span></p></td>
-        <td class="src"><span class="org">Gartner</span>《软件工程六大趋势 2026+》2026-11，趋势② <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">②</span>"产物的<b>第一读者正在从'人'转变为'Agent'</b>，产物设计标准从'人类可理解'升级为<b>'Agent 可消费'</b>……私有化部署方式中，通过 <b>RAG 嵌入私有知识库</b>的方式最多，占比 <b>40.35%</b>。"</p></td>
-        <td class="src"><span class="org caict">信通院</span>第七章① p.26；第二章⑤ p.6 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></td>
-      </tr>
-    </tbody>
+<tbody class="dir"><tr class="item"><td class="dir" rowspan="1"><div class="n"><span class="idx">1</span>知识工程</div><div class="scope">组织知识、编码标准、流程产物对 Agent 可消费</div></td><td class="q"><p><span class="k">①</span><span class="en">"Fragmented operational knowledge causes <b>hallucinations</b>… AI context platforms <b>unify scattered corporate knowledge</b> and deliver the background knowledge AI agents need… without a dedicated <b>context layer</b>: overprivileged agents, compliance failures, low trust and <b>excessive token consumption</b>."</span></p></td><td class="src"><span class="org ">Gartner</span>《2027 十大战略技术趋势》2026-10 趋势④ <a href="https://www.networkworld.com/article/4238030/gartners-top-tech-trends-for-2027-expand-and-constrain-ai-capabilities.html">↗</a></td><td class="cn"><p><span class="org caict">信通院</span>产物<b>第一读者从"人"变为"Agent"</b>，标准升级为<b>"Agent 可消费"</b>；RAG 私有知识库占 40.35% <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></p><p><span class="org ">阿里云</span>从存量代码与文档按规约模板生成<b>结构化 Spec 知识库</b>，让老系统有<b>上下文骨架</b> <a href="https://www.infoq.cn/article/BWbN5pKPLw3zSfHRj0P1">↗</a></p><p><span class="org ">腾讯</span>建<b>项目级指导原则</b>明确隐性信息，<b>代码变更全部纳入 Spec 管理</b> <a href="https://www.infoq.cn/article/d1cu8AjsPsMZoMQVRlcr">↗</a></p></td></tr>
+</tbody>
 
-    <!-- 2 Harness 工程 -->
-    <tbody class="dir">
-      <tr class="item">
-        <td class="dir" rowspan="3"><div class="n"><span class="idx">2</span>Harness 工程</div><div class="scope">上下文、指令、工具、护栏；规约与约束框架</div></td>
-        <td class="q"><p><span class="k">①</span><span class="en">"Gartner predicts that organisations with <b>AI coding harness infrastructure</b> will experience <b>60% fewer post-deployment defects by 2028</b> than those without it."</span></p></td>
-        <td class="src"><span class="org">Gartner</span>《软件工程六大趋势 2026+》2026-11，趋势② <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">②</span><span class="en">"compaction isn't sufficient. Out of the box, even a frontier coding model … will fall short of building a production-quality web app if it's only given a high-level prompt… a two-fold solution: an <b>initializer agent</b> that sets up the environment on the first run, and a <b>coding agent</b> that makes incremental progress in every session, while leaving <b>clear artifacts for the next session</b>."</span></p></td>
-        <td class="src"><span class="org ant">Anthropic</span>《Effective harnesses for long-running agents》2025-11 <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">③</span>"规约编程：专业开发者负责将模糊的业务需求转化为<b>精确、无歧义的规约描述</b>，明确系统的<b>输入输出契约、边界条件与验收标准</b>；智能体则在<b>约束框架内</b>自主规划实现路径、生成代码、编写测试并持续验证。"</p></td>
-        <td class="src"><span class="org caict">信通院</span>第七章②，p.27 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></td>
-      </tr>
-    </tbody>
+<tbody class="dir"><tr class="item"><td class="dir" rowspan="2"><div class="n"><span class="idx">2</span>Harness 工程</div><div class="scope">上下文、指令、工具、护栏；规约与约束框架</div></td><td class="q"><p><span class="k">①</span><span class="en">"AI coding agent harness: a <b>closed-loop system</b> that integrates coding platforms with <b>enterprise context, model routing, verification gates and feedback loops</b>… by late 2026 autonomous coding agents will generate <b>20% of all public commits</b>, making closed-loop harnesses <b>mandatory</b>."</span></p></td><td class="src"><span class="org ">Gartner</span>《2027 十大战略技术趋势》2026-10 趋势⑤ <a href="https://www.networkworld.com/article/4238030/gartners-top-tech-trends-for-2027-expand-and-constrain-ai-capabilities.html">↗</a></td><td class="cn"><p><span class="org caict">信通院</span><b>规约编程</b>：开发者写<b>精确规约</b>（契约、边界、验收），智能体在<b>约束框架内</b>实现 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></p><p><span class="org ">字节</span><b>引入 Harness 后正确率 80%→近 90%，可交付性 40–60 分→80 分</b>（上下文工程、架构约束、知识沉淀） <a href="https://www.itsdw.cn/news/11738.html">↗</a></p><p><span class="org ">腾讯</span>CodeBuddy 2.0：任务流后<b>主动清理上下文</b>，先定<b>结构、规范、质量门槛</b> <a href="https://www.infoq.cn/article/d1cu8AjsPsMZoMQVRlcr">↗</a></p></td></tr>
+<tr class="item"><td class="q"><p><span class="k">②</span><span class="en">"every component in a harness encodes an assumption about <b>what the model can't do on its own</b>… <b>separating the agent doing the work from the agent judging it</b> proves to be a strong lever… context resets with a <b>structured handoff</b>… <b>planner, generator, and evaluator</b>."</span></p></td><td class="src"><span class="org ant">Anthropic</span>《Harness design for long-running application development》2026-03 <a href="https://www.anthropic.com/research/harness-design-long-running-apps">↗</a></td></tr>
+</tbody>
 
-    <!-- 3 质量防护 -->
-    <tbody class="dir">
-      <tr class="item">
-        <td class="dir" rowspan="3"><div class="n"><span class="idx">3</span>质量防护</div><div class="scope">沙箱隔离、评测、安全测试</div></td>
-        <td class="q"><p><span class="k">①</span><span class="en">"Agent sandboxing involves running AI agents in <b>isolated execution environments</b>… Gartner predicts that <b>70% of enterprises</b> will sandbox agentic development workflows in pre-production environments <b>by 2030</b>, up from 10% in 2026."</span></p></td>
-        <td class="src"><span class="org">Gartner</span>《软件工程六大趋势 2026+》2026-11，趋势③ <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">②</span><span class="en">"the following <b>mandatory</b> controls mitigate the most serious attacks that can be achieved with indirect prompt injection: <b>Network egress controls</b>… <b>Block file writes outside of the workspace</b>… <b>Block writes to configuration files, no matter where they are located</b>…"</span></p></td>
-        <td class="src"><span class="org nv">NVIDIA</span>AI Red Team 博客《Sandboxing Agentic Workflows》2026-01 <a href="https://developer.nvidia.com/blog/practical-security-guidance-for-sandboxing-agentic-workflows-and-managing-execution-risk/">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">③</span>"智能测试工具主要集中于<b>功能与接口测试</b>环节，总占比超 50%，<b>安全与兼容性测试</b>等方面占比较低。"</p></td>
-        <td class="src"><span class="org caict">信通院</span>第五章①，p.20 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></td>
-      </tr>
-    </tbody>
+<tbody class="dir"><tr class="item"><td class="dir" rowspan="2"><div class="n"><span class="idx">3</span>质量防护</div><div class="scope">沙箱隔离、评测、安全测试与 AI 自动化评审</div></td><td class="q"><p><span class="k">①</span><span class="en">"<b>70% of enterprises</b> will sandbox agentic development workflows in <b>isolated pre-production environments by 2030</b>, up from 10% in 2026."</span></p></td><td class="src"><span class="org ">Gartner</span>《软件工程六大趋势 2026+》2026-11 趋势③ <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a></td><td class="cn"><p><span class="org caict">信通院</span>智能测试集中在<b>功能与接口测试</b>（>50%），<b>安全与兼容性测试</b>少 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></p><p><span class="org ">腾讯</span>"<b>白天用时间换效率，晚上用效率换时间</b>"：夜间 Agent 集群<b>分角色</b>查架构、质量、测试 <a href="https://www.infoq.cn/article/d1cu8AjsPsMZoMQVRlcr">↗</a></p><p><span class="org ">百度</span><b>Comate Rules 编码规范自动约束</b>定义 AI 行为边界；产出须进<b>统一架构、规范与交付流程</b> <a href="https://xie.infoq.cn/article/55ea42db5fc9e967082de3e8e">↗</a></p></td></tr>
+<tr class="item"><td class="q"><p><span class="k">②</span><span class="en">"the following <b>mandatory</b> controls mitigate the most serious attacks…: <b>Network egress controls</b>… <b>Block file writes outside of the workspace</b>… <b>Block writes to configuration files, no matter where they are located</b>."</span></p></td><td class="src"><span class="org nv">NVIDIA</span>AI Red Team《Sandboxing Agentic Workflows》2026-01 <a href="https://developer.nvidia.com/blog/practical-security-guidance-for-sandboxing-agentic-workflows-and-managing-execution-risk/">↗</a></td></tr>
+</tbody>
 
-    <!-- 4 组织建设 -->
-    <tbody class="dir">
-      <tr class="item">
-        <td class="dir" rowspan="2"><div class="n"><span class="idx">4</span>配套的组织建设</div><div class="scope">角色转变、新岗位、人才与技能</div></td>
-        <td class="q"><p><span class="k">①</span><span class="en">"By 2028, <b>90% of enterprise software engineers will use AI code assistants</b>, compared to less than 14% in early 2024. The role of developers will <b>shift from implementation to orchestration</b>, focusing on troubleshooting and system design… Gartner predicts that <b>more than 70% of AI technology and service providers will use forward-deployed engineers (FDEs) by 2028</b>, compared with 10% today."</span></p></td>
-        <td class="src"><span class="org">Gartner</span>《软件工程六大趋势 2025+》趋势① <a href="https://abes.org.br/en/gartner-identifica-as-principais-tendencias-estrategicas-em-engenharia-de-software-para-2025-e-alem/">↗</a><br>《软件工程六大趋势 2026+》趋势⑥ <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">②</span>"两大核心挑战，一是<b>专业人才短缺</b>仍居首位，2025 年占比达 <b>34.02%</b>；二是投入成本高，短期投入产出比不明确，关注度升至 26.85%。"</p></td>
-        <td class="src"><span class="org caict">信通院</span>第二章②，p.4 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></td>
-      </tr>
-    </tbody>
+<tbody class="dir"><tr class="item"><td class="dir" rowspan="1"><div class="n"><span class="idx">4</span>配套的组织建设</div><div class="scope">角色转变、团队形态、人才与技能</div></td><td class="q"><p><span class="k">①</span><span class="en">"By 2029, <b>60% of organizations will adopt smaller software engineering teams</b> at scale, up from 15% in 2026… tiny teams work alongside <b>platform engineering organizations</b>… a typical tiny team: a <b>product manager, a UX or AX designer and an AI-native software engineer</b>… using AI as a reason to <b>eliminate junior positions will weaken the talent pipeline</b>."</span></p></td><td class="src"><span class="org ">Gartner</span>新闻稿《60% of Organizations Will Adopt Smaller Software Engineering Teams by 2029》2026-07 <a href="https://www.varindia.com/news/60-of-organizations-will-adopt-smaller-software-engineering-teams-by-2029-says-gartner">↗</a></td><td class="cn"><p><span class="org caict">信通院</span>两大挑战：<b>专业人才短缺</b>居首（34.02%）、投入产出比不明确（26.85%） <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></p><p><span class="org ">阿里云</span>"<b>技能通胀，品味通缩</b>"：从为技能付费转向<b>为判断和结果付费</b>；组织结构<b>系统性重构</b>（Half-Stack） <a href="https://www.infoq.cn/article/BWbN5pKPLw3zSfHRj0P1">↗</a></p><p><span class="org ">字节</span>"人人都是程序员"之后，重点是<b>上下游角色协作</b> <a href="https://www.itsdw.cn/news/11738.html">↗</a></p></td></tr>
+</tbody>
 
-    <!-- 5 研发流程 -->
-    <tbody class="dir">
-      <tr class="item">
-        <td class="dir" rowspan="2"><div class="n"><span class="idx">5</span>研发流程</div><div class="scope">产品制运作、AI 融合全生命周期</div></td>
-        <td class="q"><p><span class="k">①</span><span class="en">"The integration of generative AI throughout the software development life cycle is shifting <b>from pilot validation to value realization</b>… Transition to a <b>product operating model</b> powered by internal developer platforms."</span></p></td>
-        <td class="src"><span class="org">Gartner</span>《2025 软件工程规划指南》2024-10 <a href="https://emt.gartnerweb.com/ngw/globalassets/en/technical-professionals/documents/reskin-2025-planning-guide-for-software-engineering-v2.pdf">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">②</span>"建设重心将从'能力建设'转变为<b>'规模化落地'</b>……研发流程层面，推动 AI 能力<b>深度融合需求分析、代码生成、测试验证与部署运维</b>等核心环节。"</p></td>
-        <td class="src"><span class="org caict">信通院</span>第七章⑤，p.28 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></td>
-      </tr>
-    </tbody>
+<tbody class="dir"><tr class="item"><td class="dir" rowspan="2"><div class="n"><span class="idx">5</span>研发流程</div><div class="scope">从 AI 辅助到智能体化开发、AI 融合全生命周期</div></td><td class="q"><p><span class="k">①</span><span class="en">"a shift <b>from AI-assisted software development to agentic software development</b>… by 2027, <b>more than 65% of engineering teams</b> using agentic coding will treat IDEs as optional, as <b>governance, validation and control</b> move to automated platforms."</span></p></td><td class="src"><span class="org ">Gartner</span>新闻稿《Major Shift Towards Agentic Enterprise Software Development》2026-05 <a href="https://www.businessworld.in/article/gartner-predicts-major-shift-towards-agentic-enterprise-software-development-607704">↗</a></td><td class="cn"><p><span class="org caict">信通院</span>重心从"能力建设"转向<b>"规模化落地"</b>：AI <b>深度融合需求、编码、测试、运维</b> <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></p><p><span class="org ">百度</span>"编码只占研发链路 <b>20%</b>，提速 10 倍端到端只缩短 18%"→ 搭<b>Harness 环境</b>：<b>自己跑流程、积累经验、修问题</b> <a href="https://xie.infoq.cn/article/55ea42db5fc9e967082de3e8e">↗</a></p><p><span class="org ">阿里云</span>四个"左移"：<b>质量与测试</b>（覆盖 20%→近 100%）、<b>知识工程 + Spec</b>、<b>API First</b>、<b>需求前置</b> <a href="https://www.infoq.cn/article/BWbN5pKPLw3zSfHRj0P1">↗</a></p></td></tr>
+<tr class="item"><td class="q"><p><span class="k">②</span><span class="en">"Engineers are shifting <b>from writing code to coordinating agents that write code</b>, focusing their own expertise on <b>architecture, system design, and strategic decisions</b>… developers use AI in roughly 60% of their work, they report being able to 'fully delegate' only <b>0-20% of tasks</b>."</span></p></td><td class="src"><span class="org ant">Anthropic</span>《2026 Agentic Coding Trends Report》2026-01 <a href="https://claude.com/blog/eight-trends-defining-how-software-gets-built-in-2026">↗</a></td></tr>
+</tbody>
 
-    <!-- 6 工具和算力保障 -->
-    <tbody class="dir">
-      <tr class="item">
-        <td class="dir" rowspan="2"><div class="n"><span class="idx">6</span>AI 的工具和算力保障</div><div class="scope">开发平台、模型来源、推理基础设施</div></td>
-        <td class="q"><p><span class="k">①</span><span class="en">"Local deployment can help organisations address <b>data sovereignty</b> requirements, <b>manage inference costs</b> and support applications where <b>low latency</b> is important… by 2028, <b>60% of regulated enterprises</b> will migrate AI workloads to local infrastructure… <b>40% of enterprises</b> will adopt <b>hybrid computing architectures</b> by 2028 (up from 8%)."</span></p></td>
-        <td class="src"><span class="org">Gartner</span>《软件工程六大趋势 2026+》趋势④ <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a><br>《2026 十大技术趋势》趋势② <a href="https://emt.gartnerweb.com/ngw/globalassets/en/chief-information-officer/documents/2026-top-tech-trends.pdf">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">②</span>"对大模型的应用普遍选择低成本落地方式，<b>公有云</b>方式占比 <b>31.8%</b>……全栈自研或微调方式占比不足 20%；选用模型 <b>94% 集中于八个系列</b>。"</p></td>
-        <td class="src"><span class="org caict">信通院</span>第二章⑤⑥，p.6–7 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></td>
-      </tr>
-    </tbody>
+<tbody class="dir"><tr class="item"><td class="dir" rowspan="2"><div class="n"><span class="idx">6</span>AI 的工具和算力保障</div><div class="scope">开发平台、模型来源、推理与本地基础设施</div></td><td class="q"><p><span class="k">①</span><span class="en">"Local deployment helps address <b>data sovereignty</b>, <b>manage inference costs</b> and support <b>low latency</b>… by 2028, <b>60% of regulated enterprises</b> will migrate AI workloads to local infrastructure."</span></p></td><td class="src"><span class="org ">Gartner</span>《软件工程六大趋势 2026+》2026-11 趋势④ 本地 AI <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a></td><td class="cn"><p><span class="org caict">信通院</span>落地以<b>公有云</b>为主（31.8%）；模型 <b>94% 集中于八个系列</b>，自研/微调不足 20% <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></p><p><span class="org ">字节</span>AI Coding <b>Token 消耗增长 5 倍</b>，TRAE <b>日均 5.6 万亿 Token</b>、一年 50 倍 <a href="https://www.itsdw.cn/news/11738.html">↗</a></p><p><span class="org ">中信百信 × 百度</span>智能研发白皮书 2026-08：文心快码<b>全私有化部署</b>贯穿研发全流程 <a href="https://baike.baidu.com/item/%E8%BF%88%E5%90%91AI%E5%8E%9F%E7%94%9F%E6%97%B6%E4%BB%A3%EF%BC%9A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%A9%B1%E5%8A%A8%E7%9A%84%E6%99%BA%E8%83%BD%E7%A0%94%E5%8F%91%E7%99%BD%E7%9A%AE%E4%B9%A6/68683515">↗</a></p></td></tr>
+<tr class="item"><td class="q"><p><span class="k">②</span><span class="en">"Scaling AI-native tiny teams <b>without strong platform capabilities will amplify friction, not value</b>… build <b>platform teams that manage AI complexity and risks across the SDLC</b>."</span></p></td><td class="src"><span class="org ">Gartner</span>《AI-Native Tiny Teams' Success Depends on Platform Engineering》2026-09 <a href="https://gcom.pdo.aws.gartner.com/en/documents/8450013">↗</a></td></tr>
+</tbody>
 
-    <!-- 7 成效度量（新增） -->
-    <tbody class="dir">
-      <tr class="item">
-        <td class="dir" rowspan="2"><div class="n"><span class="idx">7</span>成效度量</div><div class="scope">生产力的定义与基线、指标、AI 产出评测</div><span class="new">本次新增</span></td>
-        <td class="q"><p><span class="k">①</span><span class="en">"most organizations <b>do not have a clear definition of developer productivity or an established baseline</b> for it… AI code assistants typically drive a <b>10% to 20% increase</b> in developer productivity… <b>70% of software engineering teams</b> will adopt <b>eval-driven development</b> by 2028, compared with fewer than 20% in 2026."</span></p></td>
-        <td class="src"><span class="org">Gartner</span>《2026 软件工程规划指南》2025-10 <a href="https://emt.gartnerweb.com/ngw/globalassets/en/technical-professionals/documents/2026-planning-guide-for-software-engineering.pdf">↗</a><br>《软件工程六大趋势 2026+》趋势⑤ <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a></td>
-      </tr>
-      <tr class="item">
-        <td class="q"><p><span class="k">②</span>"战略治理层面，明确智能化研发的落地目标与<b>可量化的效能度量指标</b>。"</p></td>
-        <td class="src"><span class="org caict">信通院</span>第七章⑤，p.28 <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></td>
-      </tr>
-    </tbody>
+<tbody class="dir"><tr class="item"><td class="dir" rowspan="2"><div class="n"><span class="idx">7</span>成效度量</div><div class="scope">效能指标、AI 产出评测、不拿生码率当成效</div><span class="new">本次新增</span></td><td class="q"><p><span class="k">①</span><span class="en">"<b>70% of software engineering teams will adopt eval-driven development by 2028</b>, compared with fewer than 20% in 2026… start with roughly <b>100 curated use cases and three to five metrics</b> in CI pipelines, and turn production errors into new test cases."</span></p></td><td class="src"><span class="org ">Gartner</span>《软件工程六大趋势 2026+》2026-11 趋势⑤ <a href="https://www.expresscomputer.in/news/gartner-identifies-six-software-engineering-trends-shaping-enterprise-ai-development/141439/">↗</a></td><td class="cn"><p><span class="org caict">信通院</span>战略治理层面明确目标与<b>可量化的效能度量指标</b> <a href="https://www.caict.ac.cn/kxyj/qwfb/ztbg/202604/P020260402599647343221.pdf">↗</a></p><p><span class="org ">阿里云</span><b>前端有效代码 3 倍、后端 2 倍，千行缺陷率 −30% / −55%</b>；"生码率是<b>过程指标</b>，一观测就容易产生毒害" <a href="https://www.infoq.cn/article/BWbN5pKPLw3zSfHRj0P1">↗</a></p><p><span class="org ">字节 / 腾讯</span>"超 90% 代码 AI 产出，<b>人均吞吐率仅提升 60%</b>"；"<b>AI 写了多少代码，是最不重要的指标</b>" <a href="https://www.itsdw.cn/news/11738.html">↗</a></p></td></tr>
+<tr class="item"><td class="q"><p><span class="k">②</span><span class="en">"a race to deliver the most 'magical' developer experience is now 'a contest of <b>operational excellence, commercial maturity, and enterprise readiness</b>'… enterprises weigh <b>governance, pricing, support, workflows</b>."</span></p></td><td class="src"><span class="org ">Gartner</span>新闻稿《Major Shift Towards Agentic Enterprise Software Development》2026-05 <a href="https://www.businessworld.in/article/gartner-predicts-major-shift-towards-agentic-enterprise-software-development-607704">↗</a></td></tr>
+</tbody>
   </table>
 
   <div class="foot">
-    <div><b>证据边界</b>：Gartner 新闻稿原站限制访问，英文取自转载页（数字已与德文转述核对）；Gartner 百分比为预测值，信通院百分比为问卷结果（2,109 份有效）。Gartner 未把"知识"单列为趋势，它含在 harness 的 organisational knowledge 里。</div>
-    <div class="codes" style="text-align:right;white-space:nowrap">整理 2026-11-23 · 原文与完整对照见<br><b>AIFor研发能力建设范围-外部依据对照表.md</b></div>
+    <div><b>证据边界</b>：材料全部为 2026 年发布。Gartner 新闻稿原站限制访问，英文取自转载页；Gartner 百分比为预测值，信通院百分比为问卷结果（2,109 份有效）；国内厂商数字为各自公开分享的自述数据，口径不一，只能看方向不能横向比。Gartner 未把"知识"单列为软件工程趋势，它在《2027 十大趋势》里以"AI 上下文平台"出现。</div>
+    <div class="codes" style="text-align:right;white-space:nowrap">整理 2026-11-24 · 原文与完整对照见<br><b>AIFor研发能力建设范围-外部依据对照表.md</b></div>
   </div>
 </div>
 

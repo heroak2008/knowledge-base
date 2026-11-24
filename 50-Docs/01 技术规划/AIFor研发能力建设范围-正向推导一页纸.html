@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从 2026 年权威报告推导 AI for 研发能力建设方向</title>
+<style>
+:root{--ink:#243e46;--muted:#5f767b;--line:#dfe8e4;--teal:#187361;--teal-soft:#edf6f2;--amber:#ac7727;--amber-soft:#fbf5e9;--blue:#5277a2;--blue-soft:#eef3f9;--red:#b5544d;--red-soft:#faefee;--violet:#6a5a9e;--violet-soft:#f1eef8;--green:#5b8a3c;--green-soft:#eef5e8;--gray:#8a9a97;--gray-soft:#f1f4f3}
+*{box-sizing:border-box}
+html,body{margin:0;background:#e9efec;color:var(--ink);font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif}
+.slide{position:relative;width:1600px;height:900px;background:#fff;padding:22px 40px 18px;transform-origin:0 0;overflow:hidden}
+.slide:before{content:"";position:absolute;left:0;top:0;right:0;height:6px;background:linear-gradient(90deg,#0f3d34,#187361 60%,#2c8a74)}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--teal);font-weight:600;margin-top:4px}
+h1{font-size:25px;line-height:1.25;margin:5px 0 3px;font-weight:700}
+h1 small{font-weight:500;color:var(--muted);font-size:13.5px;margin-left:14px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+.sub b{color:var(--ink);font-weight:600}
+.flow{display:grid;grid-template-columns:600px 26px 330px 26px 1fr;align-items:stretch}
+.colhead{font-size:13px;font-weight:700;color:var(--teal);margin:0 0 6px}
+.colhead span{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;font-size:11.5px;margin-right:6px;vertical-align:-3px}
+.colhead small{font-weight:500;color:var(--muted);font-size:10.5px;margin-left:6px}
+.arrow{display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--teal);font-size:22px;font-weight:700}
+.arrow small{font-size:10px;color:var(--muted);writing-mode:vertical-rl;letter-spacing:.1em;margin-top:4px}
+/* 第一列 */
+.reports{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;align-items:start}
+.rcol{display:flex;flex-direction:column;gap:5px}
+.rc{border:1px solid var(--line);border-left:4px solid var(--teal);background:#fbfdfc;padding:4px 7px 5px}
+.rc.dom{border-left-color:var(--violet)}
+.rc h4{margin:0 0 2px;font-size:11px;line-height:1.25}
+.rc h4 code{color:var(--teal);font-size:10.5px;margin-right:3px;font-weight:700}
+.rc h4 span{color:var(--muted);font-weight:500;font-size:9.5px;margin-left:3px}
+.rc ul{margin:0;padding:0;list-style:none;font-size:10.3px;line-height:1.28}
+.rc li{padding:1px 0}
+.rc li .d{display:inline-block;min-width:22px;font-size:9px;font-weight:700;padding:0 3px;border-radius:3px;color:#fff;text-align:center;margin-right:3px;vertical-align:1px}
+.rc li.o{opacity:.8}
+.rc li.o .d{background:#fff;border:1px solid;font-weight:600}
+.k{background:var(--blue)}.h{background:var(--violet)}.q{background:var(--red)}.o{background:var(--amber)}.p{background:var(--teal)}.t{background:var(--green)}.m{background:var(--ink)}.g{background:var(--gray)}
+.rc li.o .d.k{color:var(--blue);border-color:var(--blue)}.rc li.o .d.h{color:var(--violet);border-color:var(--violet)}.rc li.o .d.q{color:var(--red);border-color:var(--red)}.rc li.o .d.o{color:var(--amber);border-color:var(--amber)}.rc li.o .d.p{color:var(--teal);border-color:var(--teal)}.rc li.o .d.t{color:var(--green);border-color:var(--green)}.rc li.o .d.m{color:var(--ink);border-color:var(--ink)}.rc li.o .d.g{color:var(--gray);border-color:var(--gray)}
+.rc.dom h4 code{color:var(--violet)}
+/* 第二列 */
+.vx{display:flex;flex-direction:column;gap:4px}
+.vrow{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--teal);background:#fff;padding:3px 7px}
+.vrow .nm{font-size:11px;line-height:1.25}
+.vrow .nm b{font-size:11.5px}
+.vrow .nm small{display:block;color:var(--muted);font-size:9.5px}
+.vrow .chips{display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end;max-width:200px}
+.chip{display:inline-block;font-size:8.5px;line-height:1;padding:2px 3px;border-radius:2px;color:#fff;font-weight:700}
+.chip.i{background:#fff;color:var(--muted);border:1px solid var(--muted);font-weight:600}
+.vrow.k{border-left-color:var(--blue)}.vrow.k .chip{background:var(--blue)}
+.vrow.h{border-left-color:var(--violet)}.vrow.h .chip{background:var(--violet)}
+.vrow.q{border-left-color:var(--red)}.vrow.q .chip{background:var(--red)}
+.vrow.o{border-left-color:var(--amber)}.vrow.o .chip{background:var(--amber)}
+.vrow.p{border-left-color:var(--teal)}.vrow.p .chip{background:var(--teal)}
+.vrow.t{border-left-color:var(--green)}.vrow.t .chip{background:var(--green)}
+.vrow.m{border-left-color:var(--ink)}.vrow.m .chip{background:var(--ink)}
+.vrow.g{border-left-color:var(--gray);background:var(--gray-soft)}.vrow.g .chip{background:var(--gray)}
+.sep{font-size:9.5px;color:var(--muted);margin:3px 0 0;padding-left:2px}
+/* 第三列 */
+.insight{border:1px solid var(--teal);background:var(--teal-soft);padding:7px 11px;font-size:11.5px;line-height:1.45;margin-bottom:6px}
+.insight h3{margin:0 0 2px;font-size:12.5px;color:var(--teal)}
+.insight p{margin:0}
+.insight b{color:#000}
+.box{border:1px solid var(--line);background:#fff;padding:5px 8px 6px;margin-bottom:6px}
+.box h4{margin:0 0 4px;font-size:11.5px;color:var(--teal)}
+.box.gray h4{color:var(--gray)}
+.frow{display:grid;grid-template-columns:92px 1fr;gap:7px;padding:3px 0;border-top:1px dashed var(--line);font-size:10.5px;line-height:1.3;align-items:start}
+.frow:first-of-type{border-top:0}
+.frow .dn{font-size:11.5px;font-weight:700;padding-top:1px}
+.frow p{margin:0}
+.frow p small{display:block;color:var(--muted);font-size:9.5px}
+.frow .tag{display:inline-block;margin-left:4px;padding:0 5px;border-radius:8px;font-size:9px;line-height:14px;vertical-align:1px;background:var(--teal-soft);color:var(--teal);font-weight:600}
+.frow .tag.new{background:var(--amber-soft);color:var(--amber)}
+.frow .tag.no{background:var(--gray-soft);color:var(--gray)}
+.bound{font-size:10px;line-height:1.4;color:var(--muted);border-left:3px solid var(--amber);background:var(--amber-soft);padding:4px 9px}
+.bound b{color:var(--ink)}
+@media print{@page{size:13.333in 7.5in;margin:0}html,body{background:#fff}.slide{transform:scale(.8);transform-origin:0 0}}
+</style>
+</head>
+<body>
+<div class="slide" id="slide">
+  <div class="eyebrow">AI for 研发能力建设范围 · 从报告到洞察（2026 年材料）</div>
+  <h1>权威报告如何推导出能力建设方向 <small>10 份 2026 年报告与实践 · 45 处关键观点 · 12 个候选方向 · 10 个进入最终范围</small></h1>
+  <p class="sub">三步读：先把每份 2026 年报告拆成一条条关键观点，并标上它指向的候选方向（左，D1–D12）；再看每个候选方向有几份来源相互印证（中，色块 = 提到它的报告，<b>实心 = 直接建议</b>、空心 = 间接提及）；最后看哪些候选进入最终范围、哪些没有、为什么（右）。颜色 = 最终去向，灰色 = 未进入。</p>
+
+  <div class="flow">
+    <!-- 第一列 -->
+    <div>
+      <p class="colhead"><span>1</span>每份报告覆盖了哪些候选方向<small>D = 候选方向编号</small></p>
+      <div class="reports">
+        <div class="rcol">
+          <div class="rc"><h4><code>G2</code>Gartner 2027 十大战略技术趋势<span>2026-10</span></h4><ul>
+            <li><span class="d k">D1</span>AI 上下文平台：统一分散知识，无上下文层则权限失控、token 超耗</li>
+            <li><span class="d h">D2</span>AI 编码智能体 Harness：闭环系统；2026 底 agent 产出 20% 公共提交</li>
+            <li><span class="d q">D3</span>AI 智能体身份 + 自主暴露修复：2028 年 25% 安全事件源于 agent 滥用；遏制窗口→48 小时</li>
+            <li><span class="d t">D9</span>主权科技：2030 年 75% 非美企业采用数字主权策略</li>
+            <li><span class="d g">D11</span>一次性应用：2030 年 80% 新应用可抛弃、易替换</li>
+            <li><span class="d g">D12</span>非文本前沿：语音推理 / 世界模型 / 大型定量模型</li></ul></div>
+          <div class="rc"><h4><code>G1</code>Gartner 软件工程六大趋势 2026+<span>2026-11</span></h4><ul>
+            <li class="o"><span class="d k">D1</span>Harness 接入组织知识与编码标准</li>
+            <li><span class="d h">D2</span>Harness Engineering 列为趋势；上线后缺陷少 60%</li>
+            <li><span class="d q">D3</span>Agent 沙箱：2030 年 70% 企业预生产隔离</li>
+            <li><span class="d q">D4</span>Eval-driven：2028 年 70% 团队采用（100 用例 + 3–5 指标起步）</li>
+            <li><span class="d o">D5</span>FDE：2028 年 70% AI 服务商部署前置工程师</li>
+            <li><span class="d t">D8</span>平台策略：限定允许的 AI 原生开发平台</li>
+            <li><span class="d t">D9</span>Local AI：数据主权、推理成本、时延；60% 受监管企业 2028 迁回</li></ul></div>
+          <div class="rc"><h4><code>G3</code>Gartner 新闻稿三篇<span>2026-05 / 07 / 09</span></h4><ul>
+            <li><span class="d p">D7</span>从 AI 辅助转向智能体化开发；2027 年 65% 团队视 IDE 为可选</li>
+            <li><span class="d q">D3</span>治理、验证、控制移到自动化平台</li>
+            <li><span class="d o">D5</span>2029 年 60% 组织规模化采用小团队；砍初级岗伤人才管道</li>
+            <li><span class="d t">D8</span>小团队依赖平台工程组织（无平台只放大摩擦）；选型看治理、定价、支持、工作流</li></ul></div>
+          <div class="rc"><h4><code>N</code>NVIDIA Agent 沙箱安全指引<span>2026-01</span></h4><ul>
+            <li><span class="d q">D3</span>OS 级强制控制三项：网络出口 / 工作区外写 / 配置文件写</li>
+            <li><span class="d g">D6</span>审批疲劳与习惯化：允许一次 ≠ 允许多次</li></ul></div>
+        </div>
+        <div class="rcol">
+          <div class="rc"><h4><code>C1</code>信通院 AI4SE 行业现状调查<span>2026-03</span></h4><ul>
+            <li><span class="d o">D5</span>专业人才短缺 34.02% 居首；OPC 多 Agent 组织</li>
+            <li><span class="d k">D1</span>高质量数据集缺乏；RAG 私有知识库 40.35%；产物第一读者从人变 Agent</li>
+            <li><span class="d h">D2</span>规约编程成为主流范式</li>
+            <li><span class="d q">D3</span>安全与兼容性测试落地少</li>
+            <li><span class="d p">D7</span>AI 融合需求 / 编码 / 测试 / 运维；重心转向规模化落地</li>
+            <li><span class="d t">D9</span>公有云 31.8%；模型 94% 集中八个系列</li>
+            <li><span class="d m">D10</span>应用成效度量难；要可量化效能指标</li></ul></div>
+          <div class="rc"><h4><code>A</code>Anthropic 趋势报告 + Harness 设计<span>2026-01 / 03</span></h4><ul>
+            <li><span class="d o">D5</span>工程师从写代码转为协调 agent；人人都是开发者</li>
+            <li><span class="d g">D6</span>60% 工作用 AI，能完全委托的仅 0–20%</li>
+            <li><span class="d q">D4</span>生成与评估分离；用 AI 自动化审查扩展人类监督</li>
+            <li><span class="d h">D2</span>三 agent 架构（规划 / 生成 / 评估）+ 上下文重置交接</li></ul></div>
+          <div class="rc dom"><h4><code>腾阿</code>国内实践 · 腾讯 / 阿里云<span>2026</span></h4><ul>
+            <li><span class="d k">D1</span>腾讯：代码变更全部纳入 Spec 管理</li>
+            <li><span class="d k">D1</span>阿里云：存量代码还原为结构化 Spec 知识库</li>
+            <li><span class="d h">D2</span>腾讯：任务流后主动清理上下文</li>
+            <li><span class="d q">D3</span>腾讯：夜间 Agent 集群分角色治理代码</li>
+            <li><span class="d o">D5</span>阿里云：技能通胀、品味通缩；Half-Stack 组织重构</li>
+            <li><span class="d p">D7</span>阿里云：质量 / 知识 / API / 需求四个"左移"</li>
+            <li><span class="d m">D10</span>腾讯："AI 写了多少代码是最不重要的指标"</li>
+            <li><span class="d m">D10</span>阿里云：有效代码 3 倍 / 2 倍、缺陷率 −30% / −55%；生码率是过程指标</li></ul></div>
+          <div class="rc dom"><h4><code>字百</code>国内实践 · 字节 / 百度<span>2026</span></h4><ul>
+            <li><span class="d h">D2</span>字节：引入 Harness 后正确率 80%→近 90%，可交付性 40–60 分→80 分</li>
+            <li><span class="d o">D5</span>字节："人人都是程序员"之后的上下游角色协作</li>
+            <li><span class="d p">D7</span>百度：编码只占 20%，提速 10 倍端到端只缩 18% → 搭 Harness 环境自己跑流程</li>
+            <li><span class="d q">D3</span>百度：Comate Rules 编码规范自动约束</li>
+            <li><span class="d t">D9</span>字节：AI Coding Token 消耗增 5 倍，TRAE 日均 5.6 万亿</li>
+            <li><span class="d t">D9</span>百度 × 百信：文心快码全私有化部署白皮书</li>
+            <li><span class="d m">D10</span>字节：超 90% 代码 AI 产出，人均吞吐率仅提升 60%</li></ul></div>
+        </div>
+      </div>
+    </div>
+    <!-- 箭头 -->
+    <div class="arrow">→<small>按候选方向归并</small></div>
+    <!-- 第二列 -->
+    <div>
+      <p class="colhead"><span>2</span>候选方向相互印证<small>色块 = 提到它的报告</small></p>
+      <div class="vx">
+        <div class="vrow q"><div class="nm"><b>D3 安全与隔离</b><small>沙箱、agent 身份、暴露修复、规范约束</small></div><div class="chips"><span class="chip">G2</span><span class="chip">G1</span><span class="chip">G3</span><span class="chip">N</span><span class="chip">C1</span><span class="chip">腾</span><span class="chip">百</span></div></div>
+        <div class="vrow h"><div class="nm"><b>D2 Harness 工程</b><small>上下文、闭环门禁、多 agent 架构</small></div><div class="chips"><span class="chip">G2</span><span class="chip">G1</span><span class="chip">A</span><span class="chip">C1</span><span class="chip">腾</span><span class="chip">字</span></div></div>
+        <div class="vrow o"><div class="nm"><b>D5 角色与技能</b><small>小团队、FDE、编排者、技能通胀</small></div><div class="chips"><span class="chip">G3</span><span class="chip">G1</span><span class="chip">A</span><span class="chip">C1</span><span class="chip">阿</span><span class="chip">字</span></div></div>
+        <div class="vrow t"><div class="nm"><b>D9 模型与算力供给</b><small>Local AI、主权、Token、私有化</small></div><div class="chips"><span class="chip">G2</span><span class="chip">G1</span><span class="chip">C1</span><span class="chip">字</span><span class="chip">百</span></div></div>
+        <div class="vrow k"><div class="nm"><b>D1 知识与规约</b><small>组织知识、数据集、Spec、Agent 可读</small></div><div class="chips"><span class="chip">G2</span><span class="chip">C1</span><span class="chip">腾</span><span class="chip">阿</span><span class="chip i">G1</span></div></div>
+        <div class="vrow p"><div class="nm"><b>D7 研发流程智能化</b><small>智能体化转变、左移、规模化落地</small></div><div class="chips"><span class="chip">G3</span><span class="chip">C1</span><span class="chip">阿</span><span class="chip">百</span></div></div>
+        <div class="vrow m"><div class="nm"><b>D10 成效度量</b><small>效能指标、生码率之辩</small></div><div class="chips"><span class="chip">C1</span><span class="chip">腾</span><span class="chip">阿</span><span class="chip">字</span></div></div>
+        <div class="vrow t"><div class="nm"><b>D8 开发者平台与平台工程</b><small>平台准入、IDP、选型标准</small></div><div class="chips"><span class="chip">G3</span><span class="chip">G1</span></div></div>
+        <div class="vrow q"><div class="nm"><b>D4 评测与质量判定</b><small>eval-driven、生成评估分离</small></div><div class="chips"><span class="chip">G1</span><span class="chip">A</span></div></div>
+        <div class="sep">— 门槛：≥2 份独立来源直接指向，且落在"AI 用于研发"范围内 —</div>
+        <div class="vrow g"><div class="nm"><b>D6 人机分工与委托度</b><small>0–20% 全委托、审批疲劳</small></div><div class="chips"><span class="chip">A</span><span class="chip">N</span></div></div>
+        <div class="vrow g"><div class="nm"><b>D11 一次性应用</b><small>80% 新应用可抛弃</small></div><div class="chips"><span class="chip">G2</span></div></div>
+        <div class="vrow g"><div class="nm"><b>D12 非文本 AI 前沿</b><small>语音 / 世界模型 / 定量模型</small></div><div class="chips"><span class="chip">G2</span></div></div>
+      </div>
+    </div>
+    <!-- 箭头 -->
+    <div class="arrow">→<small>筛选与归并</small></div>
+    <!-- 第三列 -->
+    <div>
+      <p class="colhead"><span>3</span>整合后的最终洞察</p>
+      <div class="insight"><h3>结论</h3><p>45 处观点归并成 <b>12 个候选方向</b>，<b>10 个</b>收进最终 <b>7 个方向</b>（3 组合并），<b>3 个</b>未进入。2026 年材料的重心明显收敛：<b>Gartner 把知识、Harness、治理各自升格为独立趋势</b>（AI 上下文平台、编码智能体 Harness、智能体身份）；国内四家厂商的实践<b>全部集中在 Harness 与成效度量</b>上，与报告指向一致。<b>成效度量</b>在报告侧只有 eval-driven 间接支撑、国内实践却全在谈——说明国内已从"用不用"进入<b>"怎么衡量"</b>的阶段。</p></div>
+      <div class="box"><h4>进入最终范围：7 个方向 ← 10 个候选</h4>
+        <div class="frow"><span class="dn" style="color:var(--red)">质量防护</span><p><b>沙箱隔离 + 身份权限 + 评测判定</b>，拦住 AI 产出的缺陷与风险<small>← D3 安全与隔离（7●）+ D4 评测与质量判定（2●）合并</small><span class="tag">原有</span></p></div>
+        <div class="frow"><span class="dn" style="color:var(--violet)">Harness 工程</span><p>给 coding agent 配<b>上下文、规则、工具、反馈循环</b>的闭环工程<small>← D2（6●）：字节实测正确率 +10pp、可交付性翻倍</small><span class="tag">原有</span></p></div>
+        <div class="frow"><span class="dn" style="color:var(--amber)">组织建设</span><p>角色、技能、团队形态随 AI 调整：<b>编排者、FDE、小团队</b>，保住初级人才管道<small>← D5 角色与技能（6●）</small><span class="tag">原有</span></p></div>
+        <div class="frow"><span class="dn" style="color:var(--green)">工具与算力保障</span><p><b>平台准入与平台工程 + 模型算力供给</b>，兼顾主权、成本、时延<small>← D8 开发者平台（2●）+ D9 模型与算力（5●）合并</small><span class="tag">原有</span></p></div>
+        <div class="frow"><span class="dn" style="color:var(--blue)">知识工程</span><p>把规范、架构、业务知识做成 <b>Agent 可消费</b>的知识底座（Gartner 已升格为"AI 上下文平台"）<small>← D1 知识与规约（4● / 1○）</small><span class="tag">原有</span></p></div>
+        <div class="frow"><span class="dn" style="color:var(--teal)">研发流程</span><p><b>智能体化开发、左移、规模化落地</b>，把 AI 嵌进 SDLC 每个阶段<small>← D7 研发流程智能化（4●）</small><span class="tag">原有</span></p></div>
+        <div class="frow"><span class="dn" style="color:var(--ink)">成效度量</span><p>先定义<b>效能基线</b>，用业务结果度量，<b>不拿生码率当成效</b><small>← D10 成效度量（4●，全部来自国内：信通院 + 腾讯 / 阿里云 / 字节）</small><span class="tag new">建议新增</span></p></div>
+      </div>
+      <div class="box gray"><h4>没有进入最终范围：3 个候选</h4>
+        <div class="frow"><span class="dn" style="color:var(--gray)">D6 人机分工与委托度</span><p>2● 达到门槛（Anthropic 0–20% 全委托、NVIDIA 审批疲劳），但议题分散在 Harness、质量、组织三处，<b>建议作为跨方向原则</b>写进材料<span class="tag no">并入原则</span></p></div>
+        <div class="frow"><span class="dn" style="color:var(--gray)">D11 一次性应用</span><p>仅 Gartner 2027 趋势 1●；属产品与采购策略（80% 新应用可抛弃），<b>不是研发能力建设</b><span class="tag no">范围外</span></p></div>
+        <div class="frow"><span class="dn" style="color:var(--gray)">D12 非文本 AI 前沿</span><p>仅 Gartner 2027 趋势 1●；语音推理 / 世界模型 / 定量模型与研发能力建设<b>关联弱、周期长</b><span class="tag no">议题不足</span></p></div>
+      </div>
+      <div class="bound"><b>筛选规则：</b>候选方向至少 2 份独立来源直接指向，且落在"AI 用于研发"范围内，才进入最终范围；同一最终方向下的多个候选合并计数。D11、D12 均来自 Gartner 面向 CIO 的《2027 十大战略技术趋势》，作为趋势边界保留观察。</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){var s=document.getElementById('slide');function fit(){var k=Math.min(innerWidth/1600,innerHeight/900)*0.985;s.style.transform='scale('+k+')';}fit();addEventListener('resize',fit);})();
+</script>
+</body>
+</html>
