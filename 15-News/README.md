@@ -1,10 +1,11 @@
 # 15-News · AI 资讯索引（MOC）
 
 > 本文件由每日任务自动维护，作为资讯分区的检索入口。
-> 最后更新：2026-11-27
+> 最后更新：2026-11-28
 
 ## 📅 日报（每日 09:00 更新）
 
+- [2026-11-28 · AI资讯日报](2026-11-28-AI资讯日报.md) —— GTA6 PC移植里程碑(Victory-NVIDIA DLSS 26-30fps可玩/mandy组织化续作/ScarlettPort)；opengame面向Agent游戏引擎；deslop-please去AI slop工具
 - [2026-11-27 · AI资讯日报](2026-11-27-AI资讯日报.md) —— "AI让自托管再次好玩"(HN 249)；Forbes:美政府遭AI网络攻击；GTA6生态三极(VIctory 13.4k/victory-fork 3.3k/portwatch 5.8k)；KuroCat中文AI桌宠上榜
 - [2026-11-26 · AI资讯日报](2026-11-26-AI资讯日报.md) —— HN感恩节后低谷；GTA6重编译硬件分支化(Victory-AMD fork 1.7k)；黎曼Lean验证issue翻倍至1211(审查深水区)
 - [2026-11-25 · AI资讯日报](2026-11-25-AI资讯日报.md) —— 纽约州禁儿童AI陪伴玩具5年；GTA6重编译多项目并跑(VIctory 2天11.4k/xcl组织化7.8k)；Lean社区接手黎曼假设验证
